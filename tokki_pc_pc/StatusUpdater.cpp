@@ -1,4 +1,4 @@
-class StatusUpdater
+#include "StatusUpdater.h"
 
 StatusUpdater::StatusUpdater()
 {
