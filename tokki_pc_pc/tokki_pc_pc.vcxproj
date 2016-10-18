@@ -146,6 +146,11 @@
     <ClInclude Include="DBManager.h" />
     <ClInclude Include="StatusUpdater.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CafeConnectionManager.cpp" />
+    <ClCompile Include="DBManager.cpp" />
+    <ClCompile Include="StatusUpdater.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
