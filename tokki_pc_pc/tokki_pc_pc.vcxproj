@@ -143,12 +143,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CafeConnectionManager.h" />
-    <ClInclude Include="DBManager.h" />
+    <ClInclude Include="Member.h" />
+    <ClInclude Include="ServerConnectionManager.h" />
     <ClInclude Include="StatusUpdater.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CafeConnectionManager.cpp" />
-    <ClCompile Include="DBManager.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Member.cpp" />
+    <ClCompile Include="ServerConnectionManager.cpp" />
     <ClCompile Include="StatusUpdater.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

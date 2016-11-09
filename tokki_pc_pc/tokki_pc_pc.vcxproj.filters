@@ -18,10 +18,13 @@
     <ClInclude Include="StatusUpdater.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="DBManager.h">
+    <ClInclude Include="CafeConnectionManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="CafeConnectionManager.h">
+    <ClInclude Include="ServerConnectionManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Member.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -29,10 +32,16 @@
     <ClCompile Include="StatusUpdater.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="DBManager.cpp">
+    <ClCompile Include="CafeConnectionManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="CafeConnectionManager.cpp">
+    <ClCompile Include="ServerConnectionManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Member.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
