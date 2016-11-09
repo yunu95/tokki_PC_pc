@@ -12,6 +12,7 @@ class ServerConnectionManager
 {
 	class Member;
 public:
+	static ServerConnectionManager* GetInstance();
 	ServerConnectionManager();
 	~ServerConnectionManager();
 
@@ -22,5 +23,5 @@ public:
 	// Member 는 PC managerment 클라이언트에서 받아 옵니다.(?)
 
 private:
-
+	static ServerConnectionManager* instance;
 };

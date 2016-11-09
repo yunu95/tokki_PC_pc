@@ -28,4 +28,7 @@ private:
 	void StartUsing();
 	// it gets called when user wants to stop using ther service.
 	void StopUsing();
+	// both methods below get called by QueryValidation method.
+	bool validate_ID();
+	bool validate_card();
 };
