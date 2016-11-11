@@ -16,3 +16,8 @@ ServerConnectionManager::ServerConnectionManager()
 ServerConnectionManager::~ServerConnectionManager()
 {
 }
+
+bool ServerConnectionManager::Login(const string & ID, const string & password)
+{
+	return false;
+}

@@ -5,6 +5,7 @@ Yunu Lee
 2016.11.07
 */
 int main() {
-	StatusUpdater::GetInstance();
+	if (StatusUpdater::GetInstance()->QueryValidation())
+		StatusUpdater::GetInstance()->StartUsing();
 	return 0;
 }
