@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+
 /*
 this class manages every connection between a Main management client program in a single PC cafe.
 Yunu Lee
@@ -16,6 +18,12 @@ public:
 	// "Yo! I'm using one of your cards whose index is... card_num! 
 	// if you don't have any problem with that, just return me true."
 	bool RequestCardUsage(int card_num);
+	bool Send_order(int order, int PC_number);
+	std::string Check_Time(int info_number);
+	bool Send_program(int count,int number,std::string program);
+	bool Quit_program(int Program_Num, int info);
+	std::string get_program(int Program_Num, int info);
+
 private:
 	// if you see private static class pointer of itself, and especially it's named instance,
 	// it's 100 % singleton class

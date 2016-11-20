@@ -34,4 +34,5 @@ private:
 	// both methods below get called by QueryValidation method.
 	bool validate_ID();
 	bool validate_card();
+
 };

@@ -6,6 +6,7 @@ Yunu Lee
 */
 int main() {
 	if (StatusUpdater::GetInstance()->QueryValidation())
+		// 여기서 확인한 것을 저장해야 합니다. - PC와 멤버/카드를 확인하고 체크아웃/로그아웃 전까지 연결을 유지합니다.
 		StatusUpdater::GetInstance()->StartUsing();
 	return 0;
 }
