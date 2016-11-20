@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Users\동은\Downloads\client_main.cpp" />
+    <ClCompile Include="client.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A54DF68F-2286-421B-BB97-896AE0A6E2E4}</ProjectGuid>
