@@ -30,27 +30,16 @@ StatusUpdater::~StatusUpdater()
 {
 
 }
-void StatusUpdater::UpdateStatus()
+void StatusUpdater::UpdateStatus(char* user_info,float left_seconds)
 {
 }
 void StatusUpdater::StartUsing()
 {
-		//updater_thread.join();
-		system("CLS"); // 화면을 지운다.
-		cout << \
-			"-------------------\n\
-Welcome to Tokki Pc cafe! I hope you enjoy your best time!\n\
-if you have anything required using our service, please type one of the commands listed below.\n\
-\n\
-1.StopUsing. (S) \n\
-2.Orderingfood. (F)\n\
-3.Print Left Time. (T) \n\
-4.Running program. (P)\n\
-5.Quitting program. (Q)\n\
---------------------- \n\n";
-		// QueryAction returns false when StopUsing command gets typed.
-		QueryAction();
-			return;
+	//updater_thread.join();
+	system("CLS"); // 화면을 지운다.
+	// QueryAction returns false when StopUsing command gets typed.
+	QueryAction();
+	return;
 }
 void StatusUpdater::StopUsing()
 {
@@ -98,12 +87,13 @@ bool StatusUpdater::QueryValidation()
 bool StatusUpdater::QueryAction()
 {
 	int Program_Num = 0;
-	int info= 0 ;
+	int info = 0;
 
 	while (true)
 	{
-		
 
+		
+		printOptions();
 		std::string input;
 		std::getline(cin, input);
 		cin.clear();
@@ -114,7 +104,7 @@ bool StatusUpdater::QueryAction()
 		}
 		// 1.StopUsing 
 		if (input == "s") {
-			return false;
+			continue;
 		}
 		//2.Orderingfood.
 		if (input == "f") {
@@ -126,7 +116,7 @@ bool StatusUpdater::QueryAction()
 
 			cout << "주문할 음식의 번호를 입력하세요" << endl;
 			cout << \
-"-------------------\n\
+				"-------------------\n\
 					\n\
 1.내가 토끼라면 (2000원).\n\
 2.토끼간 순대 (2000원)\n\
@@ -137,33 +127,32 @@ bool StatusUpdater::QueryAction()
 7.토끼에게 맡겨봐 - 랜덤으로 위 음식 중 하나가 주문됩니다. (2000원)\n\
 					\n\
 -------------------- \n\n"
-				<< endl;
+<< endl;
 
 			cin >> Order_Number;
 			cout << "PC의 번호를 입력하세요" << endl;
 			cin >> PC_number;
 			// PC 번호와 주문 값을 받아서 매니저에 보낸다. (소켓 프로그래밍)
-			
-			if(CafeConnectionManager::GetInstance()-> Send_order(Order_Number, PC_number)) 
+
+			if (CafeConnectionManager::GetInstance()->Send_order(Order_Number, PC_number))
 			{
-			// 아래 문구는 매니저에 성공적으로 전달되었을 때, 출력되는 문구.
-			cout << "주문이 완료 되었습니다." << endl;
+				// 아래 문구는 매니저에 성공적으로 전달되었을 때, 출력되는 문구.
+				cout << "주문이 완료 되었습니다." << endl;
 			}
-			
-			return true;
+			continue;
 		}
-		
-		
+
+
 		//3.Print Left Time.
 		if (input == "t") {
-			
+
 			int number = 0;
 			//사용자 정보를 입력받아 남은 시간을 출력하도록 한다.
 			cout << "id 나 번호를 입력하세요." << endl;
 			cin >> number;
 			cout << "남은 사용시간은 :";
 			CafeConnectionManager::GetInstance()->Check_Time(number);
-			return true;
+			continue;
 		}
 
 		//4.Running program.
@@ -180,17 +169,17 @@ bool StatusUpdater::QueryAction()
 			cout << "id 나 번호를 입력하세요." << endl;
 			cin >> info;
 			// 저장은 스택을 사용하거나 번호를 같이 넘겨서 큰 수부터 삭제.
-			if(CafeConnectionManager::GetInstance()->Send_program(Program_Num, info, program)){
-			cout << program << " is running… " << endl;
-			Program_Num++;
-		}
-			return true;
+			if (CafeConnectionManager::GetInstance()->Send_program(Program_Num, info, program)) {
+				cout << program << " is running… " << endl;
+				Program_Num++;
+			}
+			continue;
 		}
 		//5.Quitting program.
 		if (input == "q") {
 			string dead_program;
 			//info의 Program_Num 째 프로그램 (가장 최근의 프로그램)을 종료
-			
+
 			if (CafeConnectionManager::GetInstance()->Quit_program(Program_Num, info) && Program_Num > 0) {
 				string dead_program = CafeConnectionManager::GetInstance()->get_program(Program_Num, info);
 				cout << dead_program << "is closed" << endl;
@@ -198,7 +187,6 @@ bool StatusUpdater::QueryAction()
 			} // 잘되면 프로그램이 닫혔다고 출력하고 넘버를 하나 줄임.
 			else
 				cout << "Error!" << endl;
-			
 			return true;
 		}
 	}
@@ -261,3 +249,17 @@ bool StatusUpdater::validate_card()
 	return true;
 }
 
+bool StatusUpdater::printOptions() {
+	cout << \
+		"\n-------------------\n\
+Welcome to Tokki Pc cafe! I hope you enjoy your best time!\n\
+if you have anything required using our service, please type one of the commands listed below.\n\
+\n\
+1.StopUsing. (S) \n\
+2.Orderingfood. (F)\n\
+3.Print Left Time. (T) \n\
+4.Running program. (P)\n\
+5.Quitting program. (Q)\n\
+--------------------- \n\n";
+	return true;
+}

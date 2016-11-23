@@ -17,6 +17,8 @@ public:
 	void AbortUsing();
 	// it gets called after successfully acheiving validation.
 	void StartUsing();
+	// it means what it means. update its own status. it gets called by the listener from cafeconnectionmanager.
+	void UpdateStatus(char* user_info, float left_seconds);
 private:
 	// only instance.
 	static StatusUpdater* instance;
@@ -25,14 +27,12 @@ private:
 
 	StatusUpdater();
 	~StatusUpdater();
-
+	int PCnum;
 	PC_Status current_pc_status;
-	// it means what it means. update its own status according to the elapsed time.
-	void UpdateStatus();
 	// it gets called when user wants to stop using ther service.
 	void StopUsing();
 	// both methods below get called by QueryValidation method.
 	bool validate_ID();
 	bool validate_card();
-
+	bool printOptions();
 };
