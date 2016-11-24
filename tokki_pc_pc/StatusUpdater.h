@@ -25,6 +25,9 @@ private:
 	// thread to update pc's status and send it's info to pc_cafe manager client periodically.
 	std::thread updater_thread;
 
+	char user_info[100];
+	float left_time_secs;
+
 	StatusUpdater();
 	~StatusUpdater();
 	int PCnum;

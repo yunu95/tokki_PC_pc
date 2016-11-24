@@ -32,6 +32,8 @@ StatusUpdater::~StatusUpdater()
 }
 void StatusUpdater::UpdateStatus(char* user_info,float left_seconds)
 {
+	strcpy(this->user_info, user_info);
+	this->left_time_secs = left_seconds;
 }
 void StatusUpdater::StartUsing()
 {
@@ -102,6 +104,9 @@ bool StatusUpdater::QueryAction()
 		{
 			*i = tolower(*i);
 		}
+		// 0.Check status
+		if (input == "c")
+			continue;
 		// 1.StopUsing 
 		if (input == "s") {
 			continue;
@@ -255,6 +260,7 @@ bool StatusUpdater::printOptions() {
 Welcome to Tokki Pc cafe! I hope you enjoy your best time!\n\
 if you have anything required using our service, please type one of the commands listed below.\n\
 \n\
+0.Check Status. (C)\n\
 1.StopUsing. (S) \n\
 2.Orderingfood. (F)\n\
 3.Print Left Time. (T) \n\
