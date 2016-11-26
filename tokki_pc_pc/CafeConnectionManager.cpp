@@ -44,7 +44,8 @@ CafeConnectionManager::CafeConnectionManager()
 	{
 		printf("connect() Error\n");
 	}
-	// implement listener thread
+	 //implement listener thread
+	//listener = std::thread([]() {});
 	listener = std::thread(
 		[](SOCKET server)
 	{
@@ -52,13 +53,16 @@ CafeConnectionManager::CafeConnectionManager()
 		// "update    %10.0fcard 1....."
 		// or
 		// "update    %10.0fUser ID : Kim tong tong......"
+		char message[100];
+			int recv_size ;
+			
 		while (true)
 		{
-			char message[100];
-			int recv_size = recv(server, message, 100, 0);
+			
+			recv_size = recv(server, message, 100, 0);
 			if (recv_size < 0)
 			{
-				std::cout << "something ain't right!";
+				std::cout << "something ain't right!\n";
 				continue;
 			}
 			if (strncmp(message, "update    ", 10) == 0)
@@ -69,7 +73,7 @@ CafeConnectionManager::CafeConnectionManager()
 				StatusUpdater::GetInstance()->UpdateStatus(Userinfo, left_time_secs);
 			}
 		}
-	}
+	},serv_sock
 	);
 
 }
@@ -85,7 +89,7 @@ CafeConnectionManager::~CafeConnectionManager()
 	//-----------------------------------
 }
 
-bool CafeConnectionManager::Send_order(int order, int PC_number)
+bool CafeConnectionManager::Send_order(int order, const int& PC_number)
 {
 	char message[14];
 	snprintf(message, 14, "order     %1d%2d", order, PC_number);
@@ -131,4 +135,5 @@ bool CafeConnectionManager::Login(const std::string& ID, const std::string& pass
 	char message[100];
 	strcpy(message, ("login     " + ID + ";" + password + ";").c_str());
 	send(serv_sock, message, 100, 0);
+	return true;
 }
