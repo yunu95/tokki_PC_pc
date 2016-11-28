@@ -130,10 +130,37 @@ bool CafeConnectionManager::Report(bool is_turning_on)
 		send(serv_sock, "report    0", 12, 0);
 	return true;
 }
+bool CafeConnectionManager::Register(char * name, char * age, char * phonenum, char * id, char * passwd, char* question, char* psw_answer)
+{
+	char message[100];
+	char buffer[100];
+	snprintf(message, 100, "m|%s|%s|%s|%s|%s|%s|%s", name, age, phonenum, id, passwd, question, psw_answer);
+	//printf("[client] : ");
+	//scanf("%s", say);
+	send(serv_sock, message, (int)strlen(message), 0);//발신
+
+													   /* message : 서버로부터 받아온 값
+													   strleng : 서버로부터 받아온 값의 길이 */
+	while (true)
+	{
+		/*
+		여기에 답변포맷대로 오는지 확인하고 받는것 넣기
+		*/
+		int strleng = recv(serv_sock, buffer, sizeof(message) - 1, 0);//수신
+		if (strleng == -1)
+		{
+			printf(" 메세지 수신 실패 ");
+		}
+		buffer[strleng] = '\0';
+		if (strncmp(buffer, "          ", 10) == 0)
+			break;
+	}
+	return false;
+}
 bool CafeConnectionManager::Login(const std::string& ID, const std::string& password)
 {
 	char message[100];
 	strcpy(message, ("login     " + ID + ";" + password + ";").c_str());
-	send(serv_sock, message, 100, 0);
+	send(serv_sock, message, 99, 0);
 	return true;
 }
