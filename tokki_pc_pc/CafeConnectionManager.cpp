@@ -12,7 +12,13 @@ CafeConnectionManager * CafeConnectionManager::GetInstance()
 
 bool CafeConnectionManager::RequestCardUsage(int card_num)
 {
-	return true;
+	char message[100];
+	char buffer[100];
+	int recv_size;
+	snprintf(message, 100, "rcard     %d", card_num);
+	send(management_sock, message, strlen(message) + 1, 0);
+	recv_size = recv(management_sock, buffer, 100, 0);
+	return buffer[0] != '0';
 }
 
 CafeConnectionManager::CafeConnectionManager()
@@ -28,7 +34,7 @@ CafeConnectionManager::CafeConnectionManager()
 
 	//---------소켓생성-------- 
 	// serv_sock is declared in header file as well.
-	serv_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);   //TCP를 이용한 소켓
+	management_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);   //TCP를 이용한 소켓
 																   //-------------------------
 
 																   //---------서버 정보 입력--------------------
@@ -39,7 +45,7 @@ CafeConnectionManager::CafeConnectionManager()
 														  //--------------------------------------------
 
 														  //---------서버 연결------------
-	retval = connect(serv_sock, (SOCKADDR*)&serv_addr, sizeof(SOCKADDR));
+	retval = connect(management_sock, (SOCKADDR*)&serv_addr, sizeof(SOCKADDR));
 	if (retval == SOCKET_ERROR)
 	{
 		printf("connect() Error\n");
@@ -73,7 +79,7 @@ CafeConnectionManager::CafeConnectionManager()
 				StatusUpdater::GetInstance()->UpdateStatus(Userinfo, left_time_secs);
 			}
 		}
-	}, serv_sock
+	}, management_sock
 		);
 
 }
@@ -81,7 +87,7 @@ CafeConnectionManager::CafeConnectionManager()
 CafeConnectionManager::~CafeConnectionManager()
 {
 	//----------소켓 닫음------------------
-	closesocket(serv_sock);
+	closesocket(management_sock);
 	//-------------------------------------
 
 	//---------라이브러리 해제(?)---------
@@ -93,7 +99,7 @@ bool CafeConnectionManager::Send_order(int order, const int& PC_number)
 {
 	char message[14];
 	snprintf(message, 14, "order     %1d%2d", order, PC_number);
-	send(serv_sock, message, 15, 0);
+	send(management_sock, message, 15, 0);
 	return true;
 }
 
@@ -127,17 +133,27 @@ bool CafeConnectionManager::StopUsing(int pc_num) {
 	char message[100];
 	char buffer[100];
 	snprintf(message, 100, "s|%d", pc_num);
-	send(serv_sock, message, (int)strlen(message), 0);//발신	return true;
+	send(management_sock, message, (int)strlen(message), 0);
+	//발신	return true;
+	recv(management_sock, buffer, 100, 0);
+	return buffer[0] != '0';
 }
-bool CafeConnectionManager::Report(bool is_turning_on)
+bool CafeConnectionManager::Report(bool is_starting, int pc_num)
 {
-
-
-	if (is_turning_on)
-		send(serv_sock, "report    1", 12, 0);
+	char message[100];
+	char buffer[100];
+	if (is_starting)
+		snprintf(message, 100, "report    1%d", pc_num);
 	else
-		send(serv_sock, "report    0", 12, 0);
-	return true;
+		snprintf(message, 100, "report    0%d", pc_num);
+	send(management_sock, message, (int)strlen(message), 0);
+	//printf("send : %d\n", send(management_sock, message, (int)strlen(message), 0));//발신	return true;
+	//printf("recv : %d\n", recv(management_sock, buffer, 100, 0));
+	/*
+	send(management_sock, message, strlen(message) + 1, 0);
+	recv(management_sock, buffer, 100, 0);
+	*/
+	return buffer[0] != '0';
 }
 bool CafeConnectionManager::Register(char * name, char * age, char * phonenum, char * id, char * passwd, char* question, char* psw_answer)
 {
@@ -146,18 +162,23 @@ bool CafeConnectionManager::Register(char * name, char * age, char * phonenum, c
 	snprintf(message, 100, "m|%s|%s|%s|%s|%s|%s|%s", name, age, phonenum, id, passwd, question, psw_answer);
 	//printf("[client] : ");
 	//scanf("%s", say);
-	send(serv_sock, message, (int)strlen(message), 0);//발신
+	send(management_sock, message, (int)strlen(message), 0);//발신
 
 													   /* message : 서버로부터 받아온 값
 													   strleng : 서버로부터 받아온 값의 길이 */
-	int strleng = recv(serv_sock, buffer, sizeof(message) - 1, 0);//수신
+	int strleng = recv(management_sock, buffer, sizeof(message) - 1, 0);//수신
 
 	return buffer[0] != '0';
 }
 bool CafeConnectionManager::Login(const std::string& ID, const std::string& password)
 {
 	char message[100];
+	char buffer[100];
 	strcpy(message, ("login     " + ID + ";" + password + ";").c_str());
-	send(serv_sock, message, 99, 0);
-	return true;
+	if (send(management_sock, message, 99, 0) == -1)
+		printf("Send error!\n");
+
+	if (recv(management_sock, buffer, 100, 0) == -1)
+		printf("Receiving error!\n");
+	return buffer[0] != '0';
 }

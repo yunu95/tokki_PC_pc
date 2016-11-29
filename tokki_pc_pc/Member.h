@@ -4,8 +4,8 @@ it can be initialized during register, or login function.
 Yunu Lee
 2016.11.07
 */
-#include <string>
 #pragma once
+#include <string>
 class Member
 {
 public:

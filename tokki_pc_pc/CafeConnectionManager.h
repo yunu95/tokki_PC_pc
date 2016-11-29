@@ -27,7 +27,7 @@ public:
 
 	// this just reports, "This computer is turned on. but no one is using."
 	// request identifier is Report
-	bool Report(bool is_turning_on);
+	bool Report(bool is_turning_on,int pc_num);
 	// it's like telling the cafe magement client like this.
 	// "Yo! I'm using one of your cards whose index is... card_num! 
 	// if you don't have any problem with that, just return me true."
@@ -42,7 +42,7 @@ public:
 private:
 	//std::string GetSpaces(const int& length);
 	WSADATA wsaData;
-	SOCKET serv_sock;
+	SOCKET management_sock;
 	SOCKADDR_IN serv_addr;
 	// if you see private static class pointer of itself, and especially it's named instance,
 	// it's 100 % singleton class

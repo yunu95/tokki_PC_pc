@@ -55,46 +55,7 @@ StatusUpdater* StatusUpdater::GetInstance()
 	return instance;
 }
 
-bool StatusUpdater::QueryValidation()
-{
-
-	while (true) {
-		std::string Authorization_type;
-
-		cout << "\nPlease Type card, or id to get authorized\n\
-Type register to register.\n";
-		std::getline(std::cin, Authorization_type);
-		std::cin.clear();
-
-		if (Authorization_type == "card")
-		{
-			//if validation succeeds, it breaks out.
-			if (validate_card())
-				break;
-		}
-		else if (Authorization_type == "id")
-		{
-			// same here. it breaks out in case validation succeeds.
-			if (validate_ID())
-				break;
-		}
-		else if (Authorization_type == "register")
-		{
-			// same here. it breaks out in case validation succeeds.
-			if (Register())
-				break;
-		}
-		else
-		{
-			cout << "Wrong input\n";
-		}
-
-		//std::cin.ignore(INT_MAX,'\n');
-
-	}
-	return true;
-}
-bool StatusUpdater::Register() 
+bool StatusUpdater::Register()
 {
 	//m | (name) | (age) | (phonenum) | (id) | (password)| (psw_question) | (psw_answer)
 	char name[100];
@@ -124,6 +85,38 @@ bool StatusUpdater::Register()
 	cout << " what you typed, just don't work.\n";
 	return false;
 	
+}
+bool StatusUpdater::QueryValidation()
+{
+
+	while (true) {
+		std::string Authorization_type;
+
+		cout << "\nPlease Type card, or id to get authorized\n";
+		std::getline(std::cin, Authorization_type);
+		std::cin.clear();
+
+		if (Authorization_type == "card")
+		{
+			//if validation succeeds, it breaks out.
+			if (validate_card())
+				break;
+		}
+		else if (Authorization_type == "id")
+		{
+			// same here. it breaks out in case validation succeeds.
+			if (validate_ID())
+				break;
+		}
+		else
+		{
+			cout << "Wrong input\n";
+		}
+
+		//std::cin.ignore(INT_MAX,'\n');
+
+	}
+	return true;
 }
 bool StatusUpdater::QueryAction()
 {
