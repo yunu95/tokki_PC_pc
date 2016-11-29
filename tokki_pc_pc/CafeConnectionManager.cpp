@@ -44,7 +44,8 @@ CafeConnectionManager::CafeConnectionManager()
 	{
 		printf("connect() Error\n");
 	}
-	// implement listener thread
+	//implement listener thread
+   //listener = std::thread([]() {});
 	listener = std::thread(
 		[](SOCKET server)
 	{
@@ -52,25 +53,28 @@ CafeConnectionManager::CafeConnectionManager()
 		// "update    %10.0fcard 1....."
 		// or
 		// "update    %10.0fUser ID : Kim tong tong......"
+		char message[100];
+		int recv_size;
+
 		while (true)
 		{
-			char message[100];
-			int recv_size = recv(server, message, 100, 0);
+
+			recv_size = recv(server, message, 100, 0);
 			if (recv_size < 0)
 			{
-				std::cout << "something ain't right!";
+				std::cout << "something ain't right!\n";
 				continue;
 			}
 			if (strncmp(message, "update    ", 10) == 0)
 			{
 				char *Userinfo;
 				float left_time_secs;
-				left_time_secs= strtof(message + 10, &Userinfo);
+				left_time_secs = strtof(message + 10, &Userinfo);
 				StatusUpdater::GetInstance()->UpdateStatus(Userinfo, left_time_secs);
 			}
 		}
-	}
-	);
+	}, serv_sock
+		);
 
 }
 
@@ -85,7 +89,7 @@ CafeConnectionManager::~CafeConnectionManager()
 	//-----------------------------------
 }
 
-bool CafeConnectionManager::Send_order(int order, int PC_number)
+bool CafeConnectionManager::Send_order(int order, const int& PC_number)
 {
 	char message[14];
 	snprintf(message, 14, "order     %1d%2d", order, PC_number);
@@ -108,6 +112,7 @@ bool CafeConnectionManager::Send_program(int count, int number, std::string prog
 
 bool CafeConnectionManager::Quit_program(int Program_Num, int info)
 {
+
 	return true;
 }
 
@@ -118,17 +123,41 @@ std::string CafeConnectionManager::get_program(int Program_Num, int info)
 
 	return program;
 }
+bool CafeConnectionManager::StopUsing(int pc_num) {
+	char message[100];
+	char buffer[100];
+	snprintf(message, 100, "s|%d", pc_num);
+	send(serv_sock, message, (int)strlen(message), 0);//발신	return true;
+}
 bool CafeConnectionManager::Report(bool is_turning_on)
 {
+
+
 	if (is_turning_on)
 		send(serv_sock, "report    1", 12, 0);
 	else
 		send(serv_sock, "report    0", 12, 0);
 	return true;
 }
+bool CafeConnectionManager::Register(char * name, char * age, char * phonenum, char * id, char * passwd, char* question, char* psw_answer)
+{
+	char message[100];
+	char buffer[100];
+	snprintf(message, 100, "m|%s|%s|%s|%s|%s|%s|%s", name, age, phonenum, id, passwd, question, psw_answer);
+	//printf("[client] : ");
+	//scanf("%s", say);
+	send(serv_sock, message, (int)strlen(message), 0);//발신
+
+													   /* message : 서버로부터 받아온 값
+													   strleng : 서버로부터 받아온 값의 길이 */
+	int strleng = recv(serv_sock, buffer, sizeof(message) - 1, 0);//수신
+
+	return buffer[0] != '0';
+}
 bool CafeConnectionManager::Login(const std::string& ID, const std::string& password)
 {
 	char message[100];
 	strcpy(message, ("login     " + ID + ";" + password + ";").c_str());
-	send(serv_sock, message, 100, 0);
+	send(serv_sock, message, 99, 0);
+	return true;
 }

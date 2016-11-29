@@ -45,6 +45,7 @@ void StatusUpdater::StartUsing()
 }
 void StatusUpdater::StopUsing()
 {
+
 }
 // 싱글톤 static private instance를 참조하기 위해 쓰이는 정적 메서드
 StatusUpdater* StatusUpdater::GetInstance()
@@ -60,7 +61,8 @@ bool StatusUpdater::QueryValidation()
 	while (true) {
 		std::string Authorization_type;
 
-		cout << "\nPlease Type card, or id to get authorized\n";
+		cout << "\nPlease Type card, or id to get authorized\n\
+Type register to register.\n";
 		std::getline(std::cin, Authorization_type);
 		std::cin.clear();
 
@@ -76,6 +78,12 @@ bool StatusUpdater::QueryValidation()
 			if (validate_ID())
 				break;
 		}
+		else if (Authorization_type == "register")
+		{
+			// same here. it breaks out in case validation succeeds.
+			if (Register())
+				break;
+		}
 		else
 		{
 			cout << "Wrong input\n";
@@ -85,6 +93,37 @@ bool StatusUpdater::QueryValidation()
 
 	}
 	return true;
+}
+bool StatusUpdater::Register() 
+{
+	//m | (name) | (age) | (phonenum) | (id) | (password)| (psw_question) | (psw_answer)
+	char name[100];
+	char age[100];
+	char phonenum[100];
+	char id[100];
+	char password[100];
+	char question[100];
+	char answer[100];
+	cout << "What! is your name?\n";
+	scanf("%s", name);
+	cout << "How! old are you?\n";
+	scanf("%s", age);
+	cout << "What! is your cell phone number?\n";
+	scanf("%s", phonenum);
+	cout << "Type! your id.\n";
+	scanf("%s", id);
+	cout << "Type! your password.\n";
+	scanf("%s", password);
+	cout << "Type! the question for your password.\n";
+	scanf("%s", question);
+	cout << "Type! the answer for your password.\n";
+	scanf("%s", answer);
+	if (CafeConnectionManager::GetInstance()->Register(name, age, phonenum, id, password, question, answer))
+		if (CafeConnectionManager::GetInstance()->Login(string(id), string(password)))
+			return true;
+	cout << " what you typed, just don't work.\n";
+	return false;
+	
 }
 bool StatusUpdater::QueryAction()
 {
@@ -109,6 +148,7 @@ bool StatusUpdater::QueryAction()
 			continue;
 		// 1.StopUsing 
 		if (input == "s") {
+			StopUsing();
 			continue;
 		}
 		//2.Orderingfood.
@@ -216,7 +256,7 @@ bool StatusUpdater::validate_ID()
 		std::cout << "and password\n";
 		std::getline(std::cin, input_password);
 		// function called in if parameter returns true when login function succeeds.
-		if (ServerConnectionManager::GetInstance()->Login(input_id, input_password))
+		if (CafeConnectionManager::GetInstance()->Login(input_id, input_password))
 			break;
 		else
 			cout << "Wrong ID or password. try again\n\n";

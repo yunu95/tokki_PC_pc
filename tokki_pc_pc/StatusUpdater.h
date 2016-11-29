@@ -20,6 +20,7 @@ public:
 	// it means what it means. update its own status. it gets called by the listener from cafeconnectionmanager.
 	void UpdateStatus(char* user_info, float left_seconds);
 private:
+	bool Register();
 	// only instance.
 	static StatusUpdater* instance;
 	// thread to update pc's status and send it's info to pc_cafe manager client periodically.
