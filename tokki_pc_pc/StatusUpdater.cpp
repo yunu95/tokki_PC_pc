@@ -45,6 +45,7 @@ void StatusUpdater::StartUsing()
 }
 void StatusUpdater::StopUsing()
 {
+
 }
 // 싱글톤 static private instance를 참조하기 위해 쓰이는 정적 메서드
 StatusUpdater* StatusUpdater::GetInstance()
@@ -147,6 +148,7 @@ bool StatusUpdater::QueryAction()
 			continue;
 		// 1.StopUsing 
 		if (input == "s") {
+			StopUsing();
 			continue;
 		}
 		//2.Orderingfood.

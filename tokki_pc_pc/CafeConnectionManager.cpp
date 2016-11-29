@@ -44,8 +44,8 @@ CafeConnectionManager::CafeConnectionManager()
 	{
 		printf("connect() Error\n");
 	}
-	 //implement listener thread
-	//listener = std::thread([]() {});
+	//implement listener thread
+   //listener = std::thread([]() {});
 	listener = std::thread(
 		[](SOCKET server)
 	{
@@ -54,11 +54,11 @@ CafeConnectionManager::CafeConnectionManager()
 		// or
 		// "update    %10.0fUser ID : Kim tong tong......"
 		char message[100];
-			int recv_size ;
-			
+		int recv_size;
+
 		while (true)
 		{
-			
+
 			recv_size = recv(server, message, 100, 0);
 			if (recv_size < 0)
 			{
@@ -69,12 +69,12 @@ CafeConnectionManager::CafeConnectionManager()
 			{
 				char *Userinfo;
 				float left_time_secs;
-				left_time_secs= strtof(message + 10, &Userinfo);
+				left_time_secs = strtof(message + 10, &Userinfo);
 				StatusUpdater::GetInstance()->UpdateStatus(Userinfo, left_time_secs);
 			}
 		}
-	},serv_sock
-	);
+	}, serv_sock
+		);
 
 }
 
@@ -112,6 +112,7 @@ bool CafeConnectionManager::Send_program(int count, int number, std::string prog
 
 bool CafeConnectionManager::Quit_program(int Program_Num, int info)
 {
+
 	return true;
 }
 
@@ -122,8 +123,16 @@ std::string CafeConnectionManager::get_program(int Program_Num, int info)
 
 	return program;
 }
+bool CafeConnectionManager::StopUsing(int pc_num) {
+	char message[100];
+	char buffer[100];
+	snprintf(message, 100, "s|%d", pc_num);
+	send(serv_sock, message, (int)strlen(message), 0);//발신	return true;
+}
 bool CafeConnectionManager::Report(bool is_turning_on)
 {
+
+
 	if (is_turning_on)
 		send(serv_sock, "report    1", 12, 0);
 	else
@@ -141,21 +150,9 @@ bool CafeConnectionManager::Register(char * name, char * age, char * phonenum, c
 
 													   /* message : 서버로부터 받아온 값
 													   strleng : 서버로부터 받아온 값의 길이 */
-	while (true)
-	{
-		/*
-		여기에 답변포맷대로 오는지 확인하고 받는것 넣기
-		*/
-		int strleng = recv(serv_sock, buffer, sizeof(message) - 1, 0);//수신
-		if (strleng == -1)
-		{
-			printf(" 메세지 수신 실패 ");
-		}
-		buffer[strleng] = '\0';
-		if (strncmp(buffer, "          ", 10) == 0)
-			break;
-	}
-	return false;
+	int strleng = recv(serv_sock, buffer, sizeof(message) - 1, 0);//수신
+
+	return buffer[0] != '0';
 }
 bool CafeConnectionManager::Login(const std::string& ID, const std::string& password)
 {

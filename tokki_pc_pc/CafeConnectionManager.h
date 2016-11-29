@@ -37,6 +37,7 @@ public:
 	bool Send_program(int count, int number, std::string program);
 	bool Quit_program(int Program_Num, int info);
 	std::string get_program(int Program_Num, int info);
+	bool StopUsing(int pc_num);
 
 private:
 	//std::string GetSpaces(const int& length);
