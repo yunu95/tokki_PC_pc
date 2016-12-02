@@ -18,7 +18,7 @@ private:
 	const int request_bytes_size = 100;
 	std::thread listener;
 public:
-	bool Register(char * name, char * age, char * phonenum, char * id, char * passwd, char* question, char* psw_answer);
+	bool Register(char * name, char * age, char * phonenum, char * id, char * passwd, char* question, char* psw_answer, char* email_address);
 	// If you see Get Instance method, just consider the class singleton class.
 	static CafeConnectionManager* GetInstance();
 	bool Login(const std::string& ID, const std::string& password);

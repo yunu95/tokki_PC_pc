@@ -120,7 +120,6 @@ std::string CafeConnectionManager::Check_Status()
 	static char status[100];
 	send(management_sock, message, 100, 0);
 	recv(management_sock, response, 100, 0);
-	recv(management_sock, response, 100, 0);
 	/*
 	response format is like this.
 	User_Info | Left Time
@@ -177,20 +176,21 @@ bool CafeConnectionManager::Report(bool is_starting, int pc_num)
 	*/
 	return buffer[0] != '0';
 }
-bool CafeConnectionManager::Register(char * name, char * age, char * phonenum, char * id, char * passwd, char* question, char* psw_answer)
+bool CafeConnectionManager::Register(char * name, char * age, char * phonenum, char * id, char * passwd, char* question, char* psw_answer, char* email_address)
 {
-	char message[100];
-	char buffer[100];
-	snprintf(message, 100, "m|%s|%s|%s|%s|%s|%s|%s", name, age, phonenum, id, passwd, question, psw_answer);
+	char message[1024];
+	char buffer[1024];
+	snprintf(message, 1024, "m|%s|%s|%s|%s|%s|%s|%s|%s", name, age, phonenum, id, passwd, question, psw_answer,email_address);
 	//printf("[client] : ");
 	//scanf("%s", say);
 
-	send(management_sock, message, 99, 0);//발신
+	send(management_sock, message, 1024, 0);//발신
 	//send(management_sock, message, (int)strlen(message), 0);//발신
 
 													   /* message : 서버로부터 받아온 값
 													   strleng : 서버로부터 받아온 값의 길이 */
 	int strleng;
+	// it receives '0' or '1'
 	strleng = recv(management_sock, buffer, 100, 0);//수신	
 	//strleng = recv(management_sock, buffer, sizeof(message) - 1, 0);//수신
 
