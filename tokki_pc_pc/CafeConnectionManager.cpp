@@ -40,7 +40,7 @@ CafeConnectionManager::CafeConnectionManager()
 																   //---------서버 정보 입력--------------------
    //SOCKADDR_IN serv_addr; it is declared in header file
 	serv_addr.sin_family = AF_INET;                  // IP주소를 이용하고
-	serv_addr.sin_port = htons(4000);               // 소켓은 4000번에
+	serv_addr.sin_port = htons(80);               // 소켓은 4000번에
 	serv_addr.sin_addr.s_addr = inet_addr(fixed_management_pc_ip);   // 서버의 ip 주소는 127.0.0.1
 														  //--------------------------------------------
 
@@ -111,6 +111,27 @@ std::string CafeConnectionManager::Check_Time(int info_number)
 	return program;
 }
 
+std::string CafeConnectionManager::Check_Status()
+{
+	char message[100] =  "status    " ;
+	char response[100];
+	char* user_info;
+	char* left_time;
+	static char status[100];
+	send(management_sock, message, 100, 0);
+	recv(management_sock, response, 100, 0);
+	recv(management_sock, response, 100, 0);
+	/*
+	response format is like this.
+	User_Info | Left Time
+	*/
+	user_info = response;
+	for (left_time = response; *left_time != '|'; left_time++);
+	snprintf(status,100,"User Information : %s\nLeft Time : %sm %ss\n");
+	
+	return status;
+}
+
 bool CafeConnectionManager::Send_program(int count, int number, std::string program)
 {
 	return true;
@@ -142,11 +163,12 @@ bool CafeConnectionManager::Report(bool is_starting, int pc_num)
 {
 	char message[100];
 	char buffer[100];
+	int send_ret_val;
 	if (is_starting)
 		snprintf(message, 100, "report    1%d", pc_num);
 	else
 		snprintf(message, 100, "report    0%d", pc_num);
-	send(management_sock, message, (int)strlen(message), 0);
+	send_ret_val = send(management_sock, message, 100, 0);
 	//printf("send : %d\n", send(management_sock, message, (int)strlen(message), 0));//발신	return true;
 	//printf("recv : %d\n", recv(management_sock, buffer, 100, 0));
 	/*
@@ -162,23 +184,29 @@ bool CafeConnectionManager::Register(char * name, char * age, char * phonenum, c
 	snprintf(message, 100, "m|%s|%s|%s|%s|%s|%s|%s", name, age, phonenum, id, passwd, question, psw_answer);
 	//printf("[client] : ");
 	//scanf("%s", say);
-	send(management_sock, message, (int)strlen(message), 0);//발신
+
+	send(management_sock, message, 99, 0);//발신
+	//send(management_sock, message, (int)strlen(message), 0);//발신
 
 													   /* message : 서버로부터 받아온 값
 													   strleng : 서버로부터 받아온 값의 길이 */
-	int strleng = recv(management_sock, buffer, sizeof(message) - 1, 0);//수신
+	int strleng;
+	strleng = recv(management_sock, buffer, 100, 0);//수신	
+	//strleng = recv(management_sock, buffer, sizeof(message) - 1, 0);//수신
 
 	return buffer[0] != '0';
 }
 bool CafeConnectionManager::Login(const std::string& ID, const std::string& password)
 {
-	char message[100];
-	char buffer[100];
+	char message[101];
+	char buffer[101];
 	strcpy(message, ("login     " + ID + ";" + password + ";").c_str());
-	if (send(management_sock, message, 99, 0) == -1)
+	if (send(management_sock, message, 100, 0) == -1)
 		printf("Send error!\n");
+	int recvleng = recv(management_sock, buffer, 100, 0);
+	//recvleng = recv(management_sock,buffer,100,0);
 
-	if (recv(management_sock, buffer, 100, 0) == -1)
+	if (recvleng == -1)
 		printf("Receiving error!\n");
 	return buffer[0] != '0';
 }

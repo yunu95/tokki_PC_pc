@@ -34,6 +34,7 @@ public:
 	bool RequestCardUsage(int card_num);
 	bool Send_order(int order, const int& PC_number);
 	std::string Check_Time(int info_number);
+	std::string Check_Status();
 	bool Send_program(int count, int number, std::string program);
 	bool Quit_program(int Program_Num, int info);
 	std::string get_program(int Program_Num, int info);

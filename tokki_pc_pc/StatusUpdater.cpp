@@ -30,7 +30,7 @@ StatusUpdater::~StatusUpdater()
 {
 
 }
-void StatusUpdater::UpdateStatus(char* user_info,float left_seconds)
+void StatusUpdater::UpdateStatus(char* user_info, float left_seconds)
 {
 	strcpy(this->user_info, user_info);
 	this->left_time_secs = left_seconds;
@@ -66,25 +66,26 @@ bool StatusUpdater::Register()
 	char question[100];
 	char answer[100];
 	cout << "What! is your name?\n";
-	scanf("%s", name);
-	cout << "How! old are you?\n";
-	scanf("%s", age);
+	//scanf("%s", name);
+	cin.getline(name, INT_MAX);
+	cout << "How! old are you??\n";
+	cin.getline(age, INT_MAX);
 	cout << "What! is your cell phone number?\n";
-	scanf("%s", phonenum);
+	cin.getline(phonenum, INT_MAX);
 	cout << "Type! your id.\n";
-	scanf("%s", id);
+	cin.getline(id, INT_MAX);
 	cout << "Type! your password.\n";
-	scanf("%s", password);
+	cin.getline(password, INT_MAX);
 	cout << "Type! the question for your password.\n";
-	scanf("%s", question);
+	cin.getline(question, INT_MAX);
 	cout << "Type! the answer for your password.\n";
-	scanf("%s", answer);
+	cin.getline(answer, INT_MAX);
 	if (CafeConnectionManager::GetInstance()->Register(name, age, phonenum, id, password, question, answer))
 		if (CafeConnectionManager::GetInstance()->Login(string(id), string(password)))
 			return true;
 	cout << " what you typed, just don't work.\n";
 	return false;
-	
+
 }
 bool StatusUpdater::QueryValidation()
 {
@@ -92,7 +93,7 @@ bool StatusUpdater::QueryValidation()
 	while (true) {
 		std::string Authorization_type;
 
-		cout << "\nPlease Type card, or id to get authorized\n";
+		cout << "\nPlease Type card, or id to get authorized.\ntype register if you want to.\n";
 		std::getline(std::cin, Authorization_type);
 		std::cin.clear();
 
@@ -106,6 +107,12 @@ bool StatusUpdater::QueryValidation()
 		{
 			// same here. it breaks out in case validation succeeds.
 			if (validate_ID())
+				break;
+		}
+		else if (Authorization_type == "register")
+		{
+			// same here. it breaks out in case validation succeeds.
+			if (Register())
 				break;
 		}
 		else
@@ -126,7 +133,7 @@ bool StatusUpdater::QueryAction()
 	while (true)
 	{
 
-		
+
 		printOptions();
 		std::string input;
 		std::getline(cin, input);
@@ -138,7 +145,10 @@ bool StatusUpdater::QueryAction()
 		}
 		// 0.Check status
 		if (input == "c")
+		{
+			std::cout << CafeConnectionManager::GetInstance()->Check_Status();
 			continue;
+		}
 		// 1.StopUsing 
 		if (input == "s") {
 			StopUsing();
