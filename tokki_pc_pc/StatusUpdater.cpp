@@ -63,7 +63,7 @@ bool StatusUpdater::Register()
 	char age[50];
 	char phonenum[50];
 	char id[100];
-	char password[64];
+	char password[200];
 	char question[300];
 	char answer[200];
 	char email_address[100];
@@ -91,7 +91,6 @@ bool StatusUpdater::Register()
 			return true;
 	cout << " what you typed, just don't work.\n";
 	return false;
-
 }
 bool StatusUpdater::QueryValidation()
 {

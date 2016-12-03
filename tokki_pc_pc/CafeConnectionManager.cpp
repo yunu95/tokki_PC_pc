@@ -180,7 +180,7 @@ bool CafeConnectionManager::Register(char * name, char * age, char * phonenum, c
 {
 	char message[1024];
 	char buffer[1024];
-	snprintf(message, 1024, "m|%s|%s|%s|%s|%s|%s|%s|%s", name, age, phonenum, id, passwd, question, psw_answer,email_address);
+	snprintf(message, 1023, "m|%s|%s|%s|%s|%s|%s|%s|%s", name, age, phonenum, id, passwd, question, psw_answer,email_address);
 	//printf("[client] : ");
 	//scanf("%s", say);
 
@@ -198,10 +198,10 @@ bool CafeConnectionManager::Register(char * name, char * age, char * phonenum, c
 }
 bool CafeConnectionManager::Login(const std::string& ID, const std::string& password)
 {
-	char message[101];
+	char message[1024];
 	char buffer[101];
 	strcpy(message, ("login     " + ID + ";" + password + ";").c_str());
-	if (send(management_sock, message, 100, 0) == -1)
+	if (send(management_sock, message, 1023, 0) == -1)
 		printf("Send error!\n");
 	int recvleng = recv(management_sock, buffer, 100, 0);
 	//recvleng = recv(management_sock,buffer,100,0);
