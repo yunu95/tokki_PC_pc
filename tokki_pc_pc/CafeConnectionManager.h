@@ -39,6 +39,9 @@ public:
 	bool Quit_program(int Program_Num, int info);
 	std::string get_program(int Program_Num, int info);
 	bool StopUsing(int pc_num);
+	void Send_chat(std::string nick);
+	void __cdecl RecvThread(void * p);
+
 
 private:
 	//std::string GetSpaces(const int& length);

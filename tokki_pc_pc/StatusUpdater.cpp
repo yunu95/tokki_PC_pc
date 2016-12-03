@@ -237,6 +237,26 @@ bool StatusUpdater::QueryAction()
 				cout << "Error!" << endl;
 			return true;
 		}
+		//6.Random chatting.
+		if (input == "r") {
+			// 랜덤 채팅입니다. 클라이언트마다 접속 포트가 다른데, 두 포트(or id?)를 랜덤으로 매칭시킵니다.
+			// 먼저 사용할 닉네임을 받아야 하는데요, 이건 자기 아이디를 받아와서 하면 되겠죠. 아님 입력하거나.
+			
+			char nick[20];
+			printf("닉네임 >> "); // 닉네임 -> 아이디로
+			gets_s(nick); // 닉네임을 받음 
+			
+			CafeConnectionManager::GetInstance()->Send_chat(nick);
+			// 클라-클라간 랜덤 채팅을 구현하려면, 서버는 당연히 거쳐야 합니다!
+			// 따라서 접속 후 - 랜챗 메뉴 선택 - 매니저에 메시지를 보내면 매니저가 그걸 다른 곳에 보내 주면 됩니다.
+			// 여기서 둘 다 랜챗 모드 상태여야 하겠죠. 만약 랜챗에 들어와 있는게 자기 혼자라면, 자기 자신과 연결되는 것을 방지하기 위한 것도 있어야죠.
+			// 둘 중 하나라도 나간다면, "대화가 끊겼습니다." or xx님이 나가셨습니다. 를 출력.
+			// 여기서 접속 종료를 실행하면, 서버에 알려야겠죠.
+			// "새로운 상대를 찾으시겠습니까?" 를 출력합니다.
+			// 아니라면 랜챗 모드를 나가고, 메뉴가 다시 출력되도록 합니다.
+	
+			return true;
+		}
 	}
 	return false;
 }
@@ -309,6 +329,7 @@ if you have anything required using our service, please type one of the commands
 3.Print Left Time. (T) \n\
 4.Running program. (P)\n\
 5.Quitting program. (Q)\n\
+6.Random chatting. (R)\n\
 --------------------- \n\n";
 	return true;
 }

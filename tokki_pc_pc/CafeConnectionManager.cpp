@@ -81,7 +81,7 @@ CafeConnectionManager::CafeConnectionManager()
 		}
 	}, management_sock
 		);
-
+	
 }
 
 CafeConnectionManager::~CafeConnectionManager()
@@ -209,4 +209,45 @@ bool CafeConnectionManager::Login(const std::string& ID, const std::string& pass
 	if (recvleng == -1)
 		printf("Receiving error!\n");
 	return buffer[0] != '0';
+}
+
+void CafeConnectionManager::Send_chat(std::string nick)
+{
+	while (1)
+	{
+		char buf[256] = { 0 };
+		char str[256]; // 문자열
+		int size = 0;
+		printf(">> ");
+		gets_s(str); // 받아들임 
+		sprintf(buf, "[%s] %s", nick, str);
+		size = strlen(buf);
+		//---------서버에 메시지 전송---------------
+		int sendsize = send(management_sock, (char*)&size, sizeof(int), 0);
+		sendsize = send(management_sock, buf, size, 0);
+		if (sendsize <= 0)
+			break;
+		//------------------------------------------
+	}
+}
+
+void __cdecl CafeConnectionManager::RecvThread(void * p) // 리시브 스레드. 받는 스레드져.
+{
+	SOCKET sock = (SOCKET)p;
+	char buf[256];
+	int size;
+	while (1)
+	{
+		//-----------서버로부터 수신------------
+		int recvsize = recv(sock, (char*)&size, sizeof(int), 0);
+		recvsize = recv(sock, buf, size, 0);
+		if (recvsize <= 0)
+		{
+			printf("접속종료\n");
+			break;
+		}
+		//------------------------------------------------
+		buf[recvsize] = '\0';
+		printf("\r%s\n>>", buf);
+	}
 }
