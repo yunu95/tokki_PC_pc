@@ -18,6 +18,7 @@ Red.
 #include "CafeConnectionManager.h"
 #include <string>
 #include <windows.h>
+#include "sha256.h"
 
 // ΩÃ±€≈Ê static private instance
 StatusUpdater* StatusUpdater::instance = nullptr;
@@ -58,15 +59,15 @@ StatusUpdater* StatusUpdater::GetInstance()
 bool StatusUpdater::Register()
 {
 	//m | (name) | (age) | (phonenum) | (id) | (password)| (psw_question) | (psw_answer)
-	char name[100];
-	char age[100];
-	char phonenum[100];
+	char name[50];
+	char age[50];
+	char phonenum[50];
 	char id[100];
-	char password[100];
-	char question[100];
-	char answer[100];
+	char password[200];
+	char question[300];
+	char answer[200];
+	char email_address[100];
 	cout << "What! is your name?\n";
-	//scanf("%s", name);
 	cin.getline(name, INT_MAX);
 	cout << "How! old are you??\n";
 	cin.getline(age, INT_MAX);
@@ -76,16 +77,20 @@ bool StatusUpdater::Register()
 	cin.getline(id, INT_MAX);
 	cout << "Type! your password.\n";
 	cin.getline(password, INT_MAX);
+	std::string temp;
+	temp = sha256(std::string(password));
+	strcpy(password, temp.c_str());
 	cout << "Type! the question for your password.\n";
 	cin.getline(question, INT_MAX);
 	cout << "Type! the answer for your password.\n";
 	cin.getline(answer, INT_MAX);
-	if (CafeConnectionManager::GetInstance()->Register(name, age, phonenum, id, password, question, answer))
+	cout << "Type! the Email address of yours.\n";
+	cin.getline(email_address, INT_MAX);
+	if (CafeConnectionManager::GetInstance()->Register(name, age, phonenum, id, password, question, answer,email_address))
 		if (CafeConnectionManager::GetInstance()->Login(string(id), string(password)))
 			return true;
 	cout << " what you typed, just don't work.\n";
 	return false;
-
 }
 bool StatusUpdater::QueryValidation()
 {
@@ -278,6 +283,9 @@ bool StatusUpdater::validate_ID()
 		}
 		std::cout << "and password\n";
 		std::getline(std::cin, input_password);
+		std::string temp;
+		temp = sha256(std::string(input_password));
+		input_password = temp;
 		// function called in if parameter returns true when login function succeeds.
 		if (CafeConnectionManager::GetInstance()->Login(input_id, input_password))
 			break;

@@ -145,6 +145,7 @@
     <ClInclude Include="CafeConnectionManager.h" />
     <ClInclude Include="Member.h" />
     <ClInclude Include="ServerConnectionManager.h" />
+    <ClInclude Include="sha256.h" />
     <ClInclude Include="StatusUpdater.h" />
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +153,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Member.cpp" />
     <ClCompile Include="ServerConnectionManager.cpp" />
+    <ClCompile Include="sha256.cpp" />
     <ClCompile Include="StatusUpdater.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
