@@ -17,6 +17,7 @@ private:
 	// it is the standard length of the request identifier string.
 	const int request_bytes_size = 100;
 	std::thread listener;
+	std::thread RecvThread;
 public:
 	bool Register(char * name, char * age, char * phonenum, char * id, char * passwd, char* question, char* psw_answer, char* email_address);
 	// If you see Get Instance method, just consider the class singleton class.
@@ -40,7 +41,6 @@ public:
 	std::string get_program(int Program_Num, int info);
 	bool StopUsing(int pc_num);
 	void Send_chat(std::string nick);
-	void __cdecl RecvThread(void * p);
 
 
 private:

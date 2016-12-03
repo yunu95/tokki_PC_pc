@@ -51,10 +51,12 @@ CafeConnectionManager::CafeConnectionManager()
 		printf("connect() Error\n");
 	}
 	//implement listener thread
-   //listener = std::thread([]() {});
-	listener = std::thread(
-		[](SOCKET server)
-	{
+   //listener = std::thread([Capture](Parameter) {Body});
+	// Capture : 람다 함수 밖에 있는 변수를 가져올때 여기다 선언.
+	// Parameter : 말 그대로 파라미터. 인자.
+	listener = std::thread( // 리스너 스레드는 서버로부터 오는 응답을 계속 받아들이는 스레드.
+		[](SOCKET server) // 파라미터로 서버 소켓을 받음 
+	{ // body
 		// message form is like this
 		// "update    %10.0fcard 1....."
 		// or
@@ -66,10 +68,10 @@ CafeConnectionManager::CafeConnectionManager()
 		{
 
 			recv_size = recv(server, message, 100, 0);
-			if (recv_size < 0)
+			if (recv_size < 0) // 서버(매니저)에서 아무런 연락이 오지 X
 			{
 				std::cout << "something ain't right!\n";
-				continue;
+				continue; // 매니저가 아예 안띄워져 있을때
 			}
 			if (strncmp(message, "update    ", 10) == 0)
 			{
@@ -81,7 +83,30 @@ CafeConnectionManager::CafeConnectionManager()
 		}
 	}, management_sock
 		);
-	
+
+	RecvThread = std::thread( // 리시브스레드는 채팅용 스레드
+		[](SOCKET server) // 파라미터로 서버 소켓을 받음
+	{ // body
+		
+		char buf[256];
+		int size;
+		while (1)
+		{
+			//-----------서버로부터 수신------------
+			int recvsize = recv(server, (char*)&size, sizeof(int), 0);
+			recvsize = recv(server, buf, size, 0);
+			if (recvsize <= 0)
+			{
+				printf("접속종료\n");
+				break;
+			}
+			//------------------------------------------------
+			buf[recvsize] = '\0';
+			printf("\r%s\n>>", buf);
+		}
+	}, management_sock
+		);
+
 }
 
 CafeConnectionManager::~CafeConnectionManager()
@@ -222,32 +247,12 @@ void CafeConnectionManager::Send_chat(std::string nick)
 		gets_s(str); // 받아들임 
 		sprintf(buf, "[%s] %s", nick, str);
 		size = strlen(buf);
+
 		//---------서버에 메시지 전송---------------
 		int sendsize = send(management_sock, (char*)&size, sizeof(int), 0);
 		sendsize = send(management_sock, buf, size, 0);
 		if (sendsize <= 0)
 			break;
 		//------------------------------------------
-	}
-}
-
-void __cdecl CafeConnectionManager::RecvThread(void * p) // 리시브 스레드. 받는 스레드져.
-{
-	SOCKET sock = (SOCKET)p;
-	char buf[256];
-	int size;
-	while (1)
-	{
-		//-----------서버로부터 수신------------
-		int recvsize = recv(sock, (char*)&size, sizeof(int), 0);
-		recvsize = recv(sock, buf, size, 0);
-		if (recvsize <= 0)
-		{
-			printf("접속종료\n");
-			break;
-		}
-		//------------------------------------------------
-		buf[recvsize] = '\0';
-		printf("\r%s\n>>", buf);
 	}
 }

@@ -249,9 +249,9 @@ bool StatusUpdater::QueryAction()
 			
 			char nick[20];
 			printf("닉네임 >> "); // 닉네임 -> 아이디로
-			gets_s(nick); // 닉네임을 받음 
+			gets_s(nick); // 닉네임을 받음
 			
-			CafeConnectionManager::GetInstance()->Send_chat(nick);
+			CafeConnectionManager::GetInstance()->Send_chat(nick); 
 			// 클라-클라간 랜덤 채팅을 구현하려면, 서버는 당연히 거쳐야 합니다!
 			// 따라서 접속 후 - 랜챗 메뉴 선택 - 매니저에 메시지를 보내면 매니저가 그걸 다른 곳에 보내 주면 됩니다.
 			// 여기서 둘 다 랜챗 모드 상태여야 하겠죠. 만약 랜챗에 들어와 있는게 자기 혼자라면, 자기 자신과 연결되는 것을 방지하기 위한 것도 있어야죠.
