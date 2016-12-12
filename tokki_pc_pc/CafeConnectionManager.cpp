@@ -59,7 +59,7 @@ CafeConnectionManager::CafeConnectionManager()
 		// "update    %10.0fcard 1....."
 		// or
 		// "update    %10.0fUser ID : Kim tong tong......"
-		char message[100];
+		static char message[100];
 		int recv_size;
 
 		while (true)
@@ -73,7 +73,7 @@ CafeConnectionManager::CafeConnectionManager()
 			}
 			if (strncmp(message, "update    ", 10) == 0)
 			{
-				char *Userinfo;
+				char *Userinfo = message + 10;
 				float left_time_secs;
 				left_time_secs = strtof(message + 10, &Userinfo);
 				StatusUpdater::GetInstance()->UpdateStatus(Userinfo, left_time_secs);
@@ -125,8 +125,8 @@ std::string CafeConnectionManager::Check_Status()
 	User_Info | Left Time
 	*/
 	user_info = response;
-	for (left_time = response; *left_time != '|'; left_time++);
-	snprintf(status,100,"User Information : %s\nLeft Time : %sm %ss\n");
+	for (left_time = response; *left_time++ != '|';);
+	snprintf(status,100,"User Information : %s\nLeft Time : %sm %ss\n",user_info,left_time);
 	
 	return status;
 }
