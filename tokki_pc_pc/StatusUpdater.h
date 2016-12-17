@@ -1,5 +1,6 @@
 #pragma once
 #include <thread>
+#include<vector>
 class StatusUpdater
 {
 public:
@@ -21,6 +22,7 @@ public:
 	void UpdateStatus(char* user_info, float left_seconds);
 private:
 	bool Register();
+	bool FindPsw();
 	// only instance.
 	static StatusUpdater* instance;
 	// thread to update pc's status and send it's info to pc_cafe manager client periodically.
@@ -37,6 +39,5 @@ private:
 	void StopUsing();
 	// both methods below get called by QueryValidation method.
 	bool validate_ID();
-	bool validate_card();
 	bool printOptions();
 };

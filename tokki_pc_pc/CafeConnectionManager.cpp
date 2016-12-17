@@ -1,6 +1,7 @@
 #include "CafeConnectionManager.h"
 #include "StatusUpdater.h"
 #include <iostream>
+#include "sha256.h"
 CafeConnectionManager* CafeConnectionManager::instance = nullptr;
 CafeConnectionManager * CafeConnectionManager::GetInstance()
 {
@@ -10,20 +11,10 @@ CafeConnectionManager * CafeConnectionManager::GetInstance()
 		return instance = new CafeConnectionManager();
 }
 
-bool CafeConnectionManager::RequestCardUsage(int card_num)
-{
-	char message[100];
-	char buffer[100];
-	int recv_size;
-	snprintf(message, 100, "rcard     %d", card_num);
-	send(management_sock, message, strlen(message) + 1, 0);
-	recv_size = recv(management_sock, buffer, 100, 0);
-	return buffer[0] != '0';
-}
 
 CafeConnectionManager::CafeConnectionManager()
 {
-	//-------¼ÒÄÏ ¶óÀÌºê·¯¸® ºÒ·¯¿À±â(?)--------
+	//-------ì†Œì¼“ ë¼ì´ë¸ŒëŸ¬ë¦¬ ë¶ˆëŸ¬ì˜¤ê¸°(?)--------
 	//WSADATA wsaData; it is declared in header file.
 	int retval = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (retval != 0)
@@ -32,35 +23,37 @@ CafeConnectionManager::CafeConnectionManager()
 	}
 	//------------------------------------------
 
-	//---------¼ÒÄÏ»ı¼º-------- 
+	//---------ì†Œì¼“ìƒì„±-------- 
 	// serv_sock is declared in header file as well.
-	management_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);   //TCP¸¦ ÀÌ¿ëÇÑ ¼ÒÄÏ
+	management_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);   //TCPë¥¼ ì´ìš©í•œ ì†Œì¼“
 																   //-------------------------
 
-																   //---------¼­¹ö Á¤º¸ ÀÔ·Â--------------------
-   //SOCKADDR_IN serv_addr; it is declared in header file
-	serv_addr.sin_family = AF_INET;                  // IPÁÖ¼Ò¸¦ ÀÌ¿ëÇÏ°í
-	serv_addr.sin_port = htons(80);               // ¼ÒÄÏÀº 4000¹ø¿¡
-	serv_addr.sin_addr.s_addr = inet_addr(fixed_management_pc_ip);   // ¼­¹öÀÇ ip ÁÖ¼Ò´Â 127.0.0.1
-														  //--------------------------------------------
+																   //---------ì„œë²„ ì •ë³´ ì…ë ¥--------------------
+																   //SOCKADDR_IN serv_addr; it is declared in header file
+	serv_addr.sin_family = AF_INET;                  // IPì£¼ì†Œë¥¼ ì´ìš©í•˜ê³ 
+	serv_addr.sin_port = htons(80);               // ì†Œì¼“ì€ 4000ë²ˆì—
+	serv_addr.sin_addr.s_addr = inet_addr(fixed_management_pc_ip);   // ì„œë²„ì˜ ip ì£¼ì†ŒëŠ” 127.0.0.1
+																	 //--------------------------------------------
 
-														  //---------¼­¹ö ¿¬°á------------
+																	 //---------ì„œë²„ ì—°ê²°------------
 	retval = connect(management_sock, (SOCKADDR*)&serv_addr, sizeof(SOCKADDR));
 	if (retval == SOCKET_ERROR)
 	{
 		printf("connect() Error\n");
 	}
-	//implement listener thread
-   //listener = std::thread([Capture](Parameter) {Body});
-	// Capture : ¶÷´Ù ÇÔ¼ö ¹Û¿¡ ÀÖ´Â º¯¼ö¸¦ °¡Á®¿Ã¶§ ¿©±â´Ù ¼±¾ğ.
-	// Parameter : ¸» ±×´ë·Î ÆÄ¶ó¹ÌÅÍ. ÀÎÀÚ.
-	listener = std::thread( // ¸®½º³Ê ½º·¹µå´Â ¼­¹ö·ÎºÎÅÍ ¿À´Â ÀÀ´äÀ» °è¼Ó ¹Ş¾ÆµéÀÌ´Â ½º·¹µå.
-		[](SOCKET server) // ÆÄ¶ó¹ÌÅÍ·Î ¼­¹ö ¼ÒÄÏÀ» ¹ŞÀ½ 
+	//implement listener 
+
+
+	//listener = std::thread([Capture](Parameter) {Body});
+	// Capture : ëŒë‹¤ í•¨ìˆ˜ ë°–ì— ìˆëŠ” ë³€ìˆ˜ë¥¼ ê°€ì ¸ì˜¬ë•Œ ì—¬ê¸°ë‹¤ ì„ ì–¸.
+	// Parameter : ë§ ê·¸ëŒ€ë¡œ íŒŒë¼ë¯¸í„°. ì¸ì.
+	listener = std::thread( // ë¦¬ìŠ¤ë„ˆ ìŠ¤ë ˆë“œëŠ” ì„œë²„ë¡œë¶€í„° ì˜¤ëŠ” ì‘ë‹µì„ ê³„ì† ë°›ì•„ë“¤ì´ëŠ” ìŠ¤ë ˆë“œ.
+		[](SOCKET server) // íŒŒë¼ë¯¸í„°ë¡œ ì„œë²„ ì†Œì¼“ì„ ë°›ìŒ 
 	{ // body
-		// message form is like this
-		// "update    %10.0fcard 1....."
-		// or
-		// "update    %10.0fUser ID : Kim tong tong......"
+	  // message form is like this
+	  // "update    %10.0fcard 1....."
+	  // or
+	  // "update    %10.0fUser ID : Kim tong tong......"
 		static char message[100];
 		int recv_size;
 
@@ -68,10 +61,10 @@ CafeConnectionManager::CafeConnectionManager()
 		{
 
 			recv_size = recv(server, message, 100, 0);
-			if (recv_size < 0) // ¼­¹ö(¸Å´ÏÀú)¿¡¼­ ¾Æ¹«·± ¿¬¶ôÀÌ ¿ÀÁö X
+			if (recv_size < 0) // ì„œë²„(ë§¤ë‹ˆì €)ì—ì„œ ì•„ë¬´ëŸ° ì—°ë½ì´ ì˜¤ì§€ X
 			{
 				std::cout << "something ain't right!\n";
-				continue; // ¸Å´ÏÀú°¡ ¾Æ¿¹ ¾È¶ç¿öÁ® ÀÖÀ»¶§
+				exit(0); // ë§¤ë‹ˆì €ê°€ ì•„ì˜ˆ ì•ˆë„ì›Œì ¸ ìˆì„ë•Œ
 			}
 			if (strncmp(message, "update    ", 10) == 0)
 			{
@@ -82,22 +75,21 @@ CafeConnectionManager::CafeConnectionManager()
 			}
 		}
 	}, management_sock
-		);
+	);
 
-	RecvThread = std::thread( // ¸®½Ãºê½º·¹µå´Â Ã¤ÆÃ¿ë ½º·¹µå
-		[](SOCKET server) // ÆÄ¶ó¹ÌÅÍ·Î ¼­¹ö ¼ÒÄÏÀ» ¹ŞÀ½
+	RecvThread = std::thread( // ë¦¬ì‹œë¸ŒìŠ¤ë ˆë“œëŠ” ì±„íŒ…ìš© ìŠ¤ë ˆë“œ
+		[](SOCKET server) // íŒŒë¼ë¯¸í„°ë¡œ ì„œë²„ ì†Œì¼“ì„ ë°›ìŒ
 	{ // body
-		
+
 		char buf[256];
 		int size;
 		while (1)
 		{
-			//-----------¼­¹ö·ÎºÎÅÍ ¼ö½Å------------
+			//-----------ì„œë²„ë¡œë¶€í„° ìˆ˜ì‹ ------------
 			int recvsize = recv(server, (char*)&size, sizeof(int), 0);
 			recvsize = recv(server, buf, size, 0);
 			if (recvsize <= 0)
 			{
-				printf("Á¢¼ÓÁ¾·á\n");
 				break;
 			}
 			//------------------------------------------------
@@ -105,83 +97,85 @@ CafeConnectionManager::CafeConnectionManager()
 			printf("\r%s\n>>", buf);
 		}
 	}, management_sock
-		);
+	);
 
 }
 
 CafeConnectionManager::~CafeConnectionManager()
 {
-	//----------¼ÒÄÏ ´İÀ½------------------
+	//----------ì†Œì¼“ ë‹«ìŒ------------------
 	closesocket(management_sock);
 	//-------------------------------------
 
-	//---------¶óÀÌºê·¯¸® ÇØÁ¦(?)---------
+	//---------ë¼ì´ë¸ŒëŸ¬ë¦¬ í•´ì œ(?)---------
 	WSACleanup();
 	//-----------------------------------
 }
 
 bool CafeConnectionManager::Send_order(int order, const int& PC_number)
-{
+{//***ìŒì‹ì£¼ë¬¸
 	char message[14];
-	snprintf(message, 14, "order     %1d%2d", order, PC_number);
+	snprintf(message, 14, "o|%d|%d", order, PC_number);
 	send(management_sock, message, 15, 0);
 	return true;
 }
 
-std::string CafeConnectionManager::Check_Time(int info_number)
-{
-	std::string program;
-	program = "LOL.exe";
-
-	return program;
-}
-
 std::string CafeConnectionManager::Check_Status()
-{
-	char message[100] =  "status    " ;
+{//***í˜„ì¬ìƒíƒœ
+	char message[100];
 	char response[100];
 	char* user_info;
 	char* left_time;
+	char lefttime[10];
 	static char status[100];
+
+	time_t curtime;
+	struct tm *curtm;
+	curtime = time(NULL);
+	curtm = localtime(&curtime);//í˜„ì¬ì‹œê°„ì„ ì‹œê°„êµ¬ì¡°ì²´ì— ë„£ìŒ
+
+								/*statusí™•ì¸ ë²„íŠ¼ì„ ëˆŒë €ì„ ë‹¹ì‹œì˜ ì‹œê°„*/
+	std::string endtime = std::to_string(curtm->tm_hour) + ":" + std::to_string(curtm->tm_min);
+
+	snprintf(message, 100, "cs|%s", endtime.c_str());
+
 	send(management_sock, message, 100, 0);
 	recv(management_sock, response, 100, 0);
 	/*
 	response format is like this.
 	User_Info | Left Time
 	*/
-	user_info = response;
-	for (left_time = response; *left_time++ != '|';);
-	snprintf(status,100,"User Information : %s\nLeft Time : %sm %ss\n",user_info,left_time);
-	
+	user_info = strtok(response, "|");
+	left_time = strtok(NULL, "|");//ë‚¨ì€ì‹œê°„
+
+	int lt = atoi(left_time);
+	int min = lt % 60;
+	int hour = lt / 60;
+	sprintf(lefttime, "%d:%d", hour, min);
+	snprintf(status, 100, "User ID : %s\nLeft Time : %s\n", user_info, lefttime);
+
 	return status;
 }
 
-bool CafeConnectionManager::Send_program(int count, int number, std::string program)
-{
-	return true;
-}
-
-bool CafeConnectionManager::Quit_program(int Program_Num, int info)
-{
-
-	return true;
-}
-
-std::string CafeConnectionManager::get_program(int Program_Num, int info)
-{
-	std::string program;
-	program = "LOL.exe";
-
-	return program;
-}
-bool CafeConnectionManager::StopUsing(int pc_num) {
+bool CafeConnectionManager::StopUsing(int pc_num)
+{//ì¢…ë£Œ
 	char message[100];
 	char buffer[100];
-	snprintf(message, 100, "s|%d", pc_num);
+
+	system("CLS"); // í™”ë©´ì„ ì§€ìš´ë‹¤.
+
+	time_t curtime;
+	struct tm *curtm;
+	curtime = time(NULL);
+	curtm = localtime(&curtime);//í˜„ì¬ì‹œê°„ì„ ì‹œê°„êµ¬ì¡°ì²´ì— ì‚½ì…
+
+								/*ì¢…ë£Œí–ˆì„ë‹¹ì‹œì˜ ì‹œê°„*/
+	std::string endtime = std::to_string(curtm->tm_hour) + ":" + std::to_string(curtm->tm_min);
+
+	snprintf(message, 100, "s|%s", endtime.c_str());
 	send(management_sock, message, (int)strlen(message), 0);
-	//¹ß½Å	return true;
-	recv(management_sock, buffer, 100, 0);
-	return buffer[0] != '0';
+	//ë°œì‹ 	return true;
+	return true;
 }
 bool CafeConnectionManager::Report(bool is_starting, int pc_num)
 {
@@ -193,66 +187,109 @@ bool CafeConnectionManager::Report(bool is_starting, int pc_num)
 	else
 		snprintf(message, 100, "report    0%d", pc_num);
 	send_ret_val = send(management_sock, message, 100, 0);
-	//printf("send : %d\n", send(management_sock, message, (int)strlen(message), 0));//¹ß½Å	return true;
-	//printf("recv : %d\n", recv(management_sock, buffer, 100, 0));
-	/*
-	send(management_sock, message, strlen(message) + 1, 0);
-	recv(management_sock, buffer, 100, 0);
-	*/
+
 	return buffer[0] != '0';
 }
 bool CafeConnectionManager::Register(char * name, char * age, char * phonenum, char * id, char * passwd, char* question, char* psw_answer, char* email_address)
-{
+{//íšŒì›ê°€ì…
 	char message[1024];
 	char buffer[1024];
-	snprintf(message, 1023, "m|%s|%s|%s|%s|%s|%s|%s|%s", name, age, phonenum, id, passwd, question, psw_answer,email_address);
+	snprintf(message, 1023, "m|%s|%s|%s|%s|%s|%s|%s|%s", name, age, phonenum, id, passwd, question, psw_answer, email_address);
 	//printf("[client] : ");
 	//scanf("%s", say);
 
-	send(management_sock, message, 1024, 0);//¹ß½Å
-	//send(management_sock, message, (int)strlen(message), 0);//¹ß½Å
+	send(management_sock, message, 1024, 0);//ë°œì‹ 
+											//send(management_sock, message, (int)strlen(message), 0);//ë°œì‹ 
 
-													   /* message : ¼­¹ö·ÎºÎÅÍ ¹Ş¾Æ¿Â °ª
-													   strleng : ¼­¹ö·ÎºÎÅÍ ¹Ş¾Æ¿Â °ªÀÇ ±æÀÌ */
+											/* message : ì„œë²„ë¡œë¶€í„° ë°›ì•„ì˜¨ ê°’
+											strleng : ì„œë²„ë¡œë¶€í„° ë°›ì•„ì˜¨ ê°’ì˜ ê¸¸ì´ */
 	int strleng;
 	// it receives '0' or '1'
-	strleng = recv(management_sock, buffer, 100, 0);//¼ö½Å	
-	//strleng = recv(management_sock, buffer, sizeof(message) - 1, 0);//¼ö½Å
+	strleng = recv(management_sock, buffer, 100, 0);//ìˆ˜ì‹ 	
+													//strleng = recv(management_sock, buffer, sizeof(message) - 1, 0);//ìˆ˜ì‹ 
 
 	return buffer[0] != '0';
 }
-bool CafeConnectionManager::Login(const std::string& ID, const std::string& password)
-{
+int CafeConnectionManager::Login(const std::string& ID, const std::string& password)
+{//ë¡œê·¸ì¸
 	char message[1024];
-	char buffer[101];
+	char buffer[100];
+
 	strcpy(message, ("login     " + ID + ";" + password + ";").c_str());
+
 	if (send(management_sock, message, 1023, 0) == -1)
 		printf("Send error!\n");
-	int recvleng = recv(management_sock, buffer, 100, 0);
-	//recvleng = recv(management_sock,buffer,100,0);
+
+	recv(management_sock, buffer, 100, 0);
+
+
+	if (strcmp(buffer, "e") == 0 || strcmp(buffer, "false") == 0)
+	{
+		return 0;//ë¡œê·¸ì¸ì‹¤íŒ¨
+	}
+	else
+	{
+		char m[100];
+		char b[100];
+
+		sprintf(m, "lp|%s", (char*)ID.c_str());
+		send(management_sock, m, 100, 0);
+		recv(management_sock, b, 100, 0);
+
+		if (strcmp(b, "0") == 0)
+			return 2;//ë‚¨ì€ì‹œê°„ì´ 0
+		return 1;//ì •ìƒë¡œê·¸ì¸
+	}
+}
+void CafeConnectionManager::ChangePsw(char*id, char*psw, char*cpsw, int* check)
+{//ë¹„ë°€ë²ˆí˜¸ ë³€ê²½
+	char message[1024];
+	char buf[100] = { "" };
+	std::string p = psw;
+	std::string cp = cpsw;
+
+	/*ë¹„ë°€ë²ˆí˜¸ì™€ ë°”ê¿€ë¹„ë°€ë²ˆí˜¸ê°€ ëª¨ë‘ ì•”í˜¸í™”ë¨*/
+	snprintf(message, 1024, "c|%s|%s|%s", id, (char*)sha256(p).c_str(), (char*)sha256(cp).c_str());
+	send(management_sock, message, (int)strlen(message), 0);
+	int recvleng = recv(management_sock, buf, 100, 0);
 
 	if (recvleng == -1)
 		printf("Receiving error!\n");
-	return buffer[0] != '0';
+
+	if (buf[0] == '0')
+		*check = 0;//ì‹¤íŒ¨
+	else
+		*check = 1;//ì„±ê³µ
 }
+char* CafeConnectionManager::Question(char*id)
+{//ë¹„ë°€ë²ˆí˜¸í™•ì¸ì§ˆë¬¸
+	char message[1024];
+	char buf[100] = { "" };
 
-void CafeConnectionManager::Send_chat(std::string nick)
-{
-	while (1)
+	snprintf(message, 1024, "fa|%s", id);
+	send(management_sock, message, (int)strlen(message), 0);
+	int recvleng = recv(management_sock, buf, 100, 0);
+
+	return buf;
+}
+bool CafeConnectionManager::Answer(char*id, char*answer)
+{//ë¹„ë°€ë²ˆí˜¸í™•ì¸ì§ˆë¬¸ ë‹µ
+	char message[1024];
+	char buf[100] = { "" };
+
+	snprintf(message, 1024, "fr|%s|%s", id, answer);
+	send(management_sock, message, (int)strlen(message), 0);
+
+	int recvleng = recv(management_sock, buf, 100, 0);
+
+	if (buf[0] == '0')
 	{
-		char buf[256] = { 0 };
-		char str[256]; // ¹®ÀÚ¿­
-		int size = 0;
-		printf(">> ");
-		gets_s(str); // ¹Ş¾ÆµéÀÓ 
-		sprintf(buf, "[%s] %s", nick, str);
-		size = strlen(buf);
-
-		//---------¼­¹ö¿¡ ¸Ş½ÃÁö Àü¼Û---------------
-		int sendsize = send(management_sock, (char*)&size, sizeof(int), 0);
-		sendsize = send(management_sock, buf, size, 0);
-		if (sendsize <= 0)
-			break;
-		//------------------------------------------
+		printf("ë‹µì´ í‹€ë ¸ìŠµë‹ˆë‹¤!\n");
+		return false;
+	}
+	else
+	{
+		printf("ì„ì‹œ ë¹„ë°€ë²ˆí˜¸ë¥¼ ê·€í•˜ì˜ ì´ë©”ì¼ë¡œ ë³´ëƒˆìŠµë‹ˆë‹¤.\në¡œê·¸ì¸ í•˜ì‹  ë’¤, ë¹„ë°€ë²ˆí˜¸ë¥¼ ë³€ê²½í•´ì£¼ì„¸ìš”!!\n\n");
+		return true;
 	}
 }

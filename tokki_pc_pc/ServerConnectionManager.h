@@ -20,7 +20,7 @@ public:
 	bool Register();
 	Member GetUserData(std::string& ID);
 	bool RegisterUserData(Member);
-	// Member ´Â PC managerment Å¬¶óÀÌ¾ğÆ®¿¡¼­ ¹Ş¾Æ ¿É´Ï´Ù.(?)
+	// Member ëŠ” PC managerment í´ë¼ì´ì–¸íŠ¸ì—ì„œ ë°›ì•„ ì˜µë‹ˆë‹¤.(?)
 
 private:
 	static ServerConnectionManager* instance;

@@ -4,9 +4,9 @@ it interprets user's command and does what it's intended to do.
 yunu Lee
 2016.11.07
 -------------------------
-ÇöÀç ·Î±×ÀÎ±îÁö ±¸ÇöµÈ »óÅÂ. - È¸¿ø°¡ÀÔµµ ±¸ÇöÇØ¾ß ÇÔ.
-·Î±×ÀÎ µÚ - ¸í·É¾î¸¦ ÀÔ·Â¹Ş´Â °Í±îÁö.
-±×¸®°í À½½Ä¸Ş´º, ¿ä±İÁ¦ Ç¥ ÀÛ¼º.
+í˜„ì¬ ë¡œê·¸ì¸ê¹Œì§€ êµ¬í˜„ëœ ìƒíƒœ. - íšŒì›ê°€ì…ë„ êµ¬í˜„í•´ì•¼ í•¨.
+ë¡œê·¸ì¸ ë’¤ - ëª…ë ¹ì–´ë¥¼ ì…ë ¥ë°›ëŠ” ê²ƒê¹Œì§€.
+ê·¸ë¦¬ê³  ìŒì‹ë©”ë‰´, ìš”ê¸ˆì œ í‘œ ì‘ì„±.
 Red.
 2016. 11. 18
 ------------------------
@@ -17,10 +17,11 @@ Red.
 #include "ServerConnectionManager.h"
 #include "CafeConnectionManager.h"
 #include <string>
+#include<conio.h>
 #include <windows.h>
 #include "sha256.h"
-
-// ½Ì±ÛÅæ static private instance
+#include<vector>
+// ì‹±ê¸€í†¤ static private instance
 StatusUpdater* StatusUpdater::instance = nullptr;
 StatusUpdater::StatusUpdater()
 {
@@ -39,16 +40,16 @@ void StatusUpdater::UpdateStatus(char* user_info, float left_seconds)
 void StatusUpdater::StartUsing()
 {
 	//updater_thread.join();
-	system("CLS"); // È­¸éÀ» Áö¿î´Ù.
-	// QueryAction returns false when StopUsing command gets typed.
+	system("CLS"); // í™”ë©´ì„ ì§€ìš´ë‹¤.
+				   // QueryAction returns false when StopUsing command gets typed.
 	QueryAction();
 	return;
 }
 void StatusUpdater::StopUsing()
 {
-
+	printf("\n---Shut Down...---\n");
 }
-// ½Ì±ÛÅæ static private instance¸¦ ÂüÁ¶ÇÏ±â À§ÇØ ¾²ÀÌ´Â Á¤Àû ¸Ş¼­µå
+// ì‹±ê¸€í†¤ static private instanceë¥¼ ì°¸ì¡°í•˜ê¸° ìœ„í•´ ì“°ì´ëŠ” ì •ì  ë©”ì„œë“œ
 StatusUpdater* StatusUpdater::GetInstance()
 {
 	if (!instance)
@@ -57,8 +58,8 @@ StatusUpdater* StatusUpdater::GetInstance()
 }
 
 bool StatusUpdater::Register()
-{
-	//m | (name) | (age) | (phonenum) | (id) | (password)| (psw_question) | (psw_answer)
+{//íšŒì›ê°€ì´ì…
+ //m | (name) | (age) | (phonenum) | (id) | (password)| (psw_question) | (psw_answer)
 	char name[50];
 	char age[50];
 	char phonenum[50];
@@ -86,46 +87,80 @@ bool StatusUpdater::Register()
 	cin.getline(answer, INT_MAX);
 	cout << "Type! the Email address of yours.\n";
 	cin.getline(email_address, INT_MAX);
-	if (CafeConnectionManager::GetInstance()->Register(name, age, phonenum, id, password, question, answer,email_address))
+	if (CafeConnectionManager::GetInstance()->Register(name, age, phonenum, id, password, question, answer, email_address))
 		if (CafeConnectionManager::GetInstance()->Login(string(id), string(password)))
 			return true;
 	cout << " what you typed, just don't work.\n";
 	return false;
 }
+
+bool StatusUpdater::FindPsw()
+{//ë¹„ë°€ë²ˆí˜¸ì°¾ê¸°
+
+	char id[20];
+	printf("---ë¹„ë°€ë²ˆí˜¸ ì°¾ê¸°---\n");
+	printf("idë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”! : ");
+	scanf("%s", id);
+	std::string answer;
+	char question[60];
+	strcpy(question, CafeConnectionManager::GetInstance()->Question(id));
+	if (question[0] == '0')
+	{//ì°¾ê¸° ì‹¤íŒ¨
+		printf("idê°€ ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤!!\n");
+		return false;
+	}
+
+	printf("ë¹„ë°€ë²ˆí˜¸ ì§ˆë¬¸ : %s\n", question);
+	printf("ë‹µ : ");
+	getline(cin, answer);
+
+	if (answer.compare("") == 0)//ë²„í¼ê°€ ì•ˆë¹„ì›Œì¡Œì„ë•Œ(ë¹„ì •ìƒì ì¸ ì…ë ¥)
+		std::getline(cin, answer);//ë‹¤ì‹œì…ë ¥ë°›ìŒ
+
+	if (CafeConnectionManager::GetInstance()->Answer(id, (char*)answer.c_str()) == false)
+	{
+		return false;//ì‹¤íŒ¨
+	}
+	else
+		return true;//ì„±ê³µ
+
+
+}
+
 bool StatusUpdater::QueryValidation()
 {
 
 	while (true) {
 		std::string Authorization_type;
 
-		cout << "\nPlease Type card, or id to get authorized.\ntype register if you want to.\n";
+		cout << "\nHELLO! ***TOKKI-PC*** \n\n\níšŒì› : (U)\níšŒì›ê°€ì… : (R)\në¹„ë°€ë²ˆí˜¸ì°¾ê¸° : (F)\n";
 		std::getline(std::cin, Authorization_type);
-		std::cin.clear();
 
-		if (Authorization_type == "card")
-		{
-			//if validation succeeds, it breaks out.
-			if (validate_card())
-				break;
-		}
-		else if (Authorization_type == "id")
+		if (Authorization_type.compare("") == 0)
+			std::getline(cin, Authorization_type);
+
+		if (Authorization_type == "u" || Authorization_type == "U")
 		{
 			// same here. it breaks out in case validation succeeds.
 			if (validate_ID())
 				break;
 		}
-		else if (Authorization_type == "register")
+		else if (Authorization_type == "r" || Authorization_type == "R")
 		{
 			// same here. it breaks out in case validation succeeds.
 			if (Register())
-				break;
+				continue;
+		}
+		else if (Authorization_type == "f" || Authorization_type == "F")
+		{
+			// same here. it breaks out in case validation succeeds.
+			if (FindPsw())
+				continue;
 		}
 		else
 		{
 			cout << "Wrong input\n";
 		}
-
-		//std::cin.ignore(INT_MAX,'\n');
 
 	}
 	return true;
@@ -134,16 +169,19 @@ bool StatusUpdater::QueryAction()
 {
 	int Program_Num = 0;
 	int info = 0;
-
+	vector<string> program;//ì‹¤í–‰ì¤‘ì¸í”„ë¡œê·¸ë¨ ë²¡í„°
 	while (true)
 	{
-
-
 		printOptions();
 		std::string input;
+
 		std::getline(cin, input);
-		cin.clear();
-		// for the convenience,
+
+		if (input.compare("") == 0)//ì •ìƒì ì¸ì…ë ¥ì´ì•„ë‹ë•Œ(ê³µë°± ë“± nullë¬¸ì)
+			std::getline(cin, input);//ë‹¤ì‹œì…ë ¥ë°›ìŒ
+
+
+									 // for the convenience,
 		for (string::iterator i = input.begin(); i < input.end(); i++)
 		{
 			*i = tolower(*i);
@@ -157,7 +195,18 @@ bool StatusUpdater::QueryAction()
 		// 1.StopUsing 
 		if (input == "s") {
 			StopUsing();
-			continue;
+
+			while (!program.empty())
+			{//í”„ë¡œê·¸ë¨ë²¡í„°ì— ë“¤ì–´ìˆë˜ ì›ì†Œë“¤ì„ ì°¨ë¡€ëŒ€ë¡œ ì¶œë ¥
+
+			 /*ìµœê·¼ í”„ë¡œê·¸ë¨ë¶€í„° popí•¨*/
+				cout << program.back() << "ì„ ì¢…ë£Œí•˜ì˜€ìŠµë‹ˆë‹¤." << endl;
+				program.pop_back();
+
+				/*1ì´ˆì”© ì‰¼*/
+				Sleep(1000);
+			}
+			break;
 		}
 		//2.Orderingfood.
 		if (input == "f") {
@@ -165,105 +214,110 @@ bool StatusUpdater::QueryAction()
 			int Order_Number = 0;
 			int PC_number = 0;
 
-			// ¸ÕÀú À½½ÄÇ¥ Ãâ·ÂµÇ°í - »ç¿ëÀÚ°¡ ¼±ÅÃÇÏµµ·Ï ¿ä±¸ÇÔ.
+			// ë¨¼ì € ìŒì‹í‘œ ì¶œë ¥ë˜ê³  - ì‚¬ìš©ìê°€ ì„ íƒí•˜ë„ë¡ ìš”êµ¬í•¨.
 
-			cout << "ÁÖ¹®ÇÒ À½½ÄÀÇ ¹øÈ£¸¦ ÀÔ·ÂÇÏ¼¼¿ä" << endl;
+			cout << "ì£¼ë¬¸í•  ìŒì‹ì˜ ë²ˆí˜¸ë¥¼ ì…ë ¥í•˜ì„¸ìš”" << endl;
 			cout << \
 				"-------------------\n\
 					\n\
-1.³»°¡ Åä³¢¶ó¸é (2000¿ø).\n\
-2.Åä³¢°£ ¼ø´ë (2000¿ø)\n\
-3.»êÅä³¢ Á¤½Ä (5000¿ø) \n\
-4.Äİ-¶ó (1000¿ø)\n\
-5.Åä³¢ ºÒ°í±â¹ö°Å (1500¿ø)\n\
-6.ºñÅ¸¹Î¿öÅÍ (1200¿ø)\n\
-7.Åä³¢¿¡°Ô ¸Ã°ÜºÁ - ·£´ıÀ¸·Î À§ À½½Ä Áß ÇÏ³ª°¡ ÁÖ¹®µË´Ï´Ù. (2000¿ø)\n\
+1.ë‚´ê°€ í† ë¼ë¼ë©´ (2000ì›).\n\
+2.í† ë¼ê°„ ìˆœëŒ€ (2000ì›)\n\
+3.ì‚°í† ë¼ ì •ì‹ (5000ì›) \n\
+4.ì½œ-ë¼ (1000ì›)\n\
+5.í† ë¼ ë¶ˆê³ ê¸°ë²„ê±° (1500ì›)\n\
+6.ë¹„íƒ€ë¯¼ì›Œí„° (1200ì›)\n\
+7.í† ë¼ë®ë°¥ (2000ì›)\n\
 					\n\
 -------------------- \n\n"
 << endl;
 
-			cin >> Order_Number;
-			cout << "PCÀÇ ¹øÈ£¸¦ ÀÔ·ÂÇÏ¼¼¿ä" << endl;
-			cin >> PC_number;
-			// PC ¹øÈ£¿Í ÁÖ¹® °ªÀ» ¹Ş¾Æ¼­ ¸Å´ÏÀú¿¡ º¸³½´Ù. (¼ÒÄÏ ÇÁ·Î±×·¡¹Ö)
+			scanf("%d", &Order_Number);
+			cout << "PCì˜ ë²ˆí˜¸ë¥¼ ì…ë ¥í•˜ì„¸ìš”" << endl;
+			scanf("%d", &PC_number);
+			// PC ë²ˆí˜¸ì™€ ì£¼ë¬¸ ê°’ì„ ë°›ì•„ì„œ ë§¤ë‹ˆì €ì— ë³´ë‚¸ë‹¤. (ì†Œì¼“ í”„ë¡œê·¸ë˜ë°)
 
 			if (CafeConnectionManager::GetInstance()->Send_order(Order_Number, PC_number))
 			{
-				// ¾Æ·¡ ¹®±¸´Â ¸Å´ÏÀú¿¡ ¼º°øÀûÀ¸·Î Àü´ŞµÇ¾úÀ» ¶§, Ãâ·ÂµÇ´Â ¹®±¸.
-				cout << "ÁÖ¹®ÀÌ ¿Ï·á µÇ¾ú½À´Ï´Ù." << endl;
+				// ì•„ë˜ ë¬¸êµ¬ëŠ” ë§¤ë‹ˆì €ì— ì„±ê³µì ìœ¼ë¡œ ì „ë‹¬ë˜ì—ˆì„ ë•Œ, ì¶œë ¥ë˜ëŠ” ë¬¸êµ¬.
+				cout << "ì£¼ë¬¸ì´ ì™„ë£Œ ë˜ì—ˆìŠµë‹ˆë‹¤." << endl;
 			}
+			cin.clear();
+			//cin.ignore('\n');
 			continue;
 		}
 
 
-		//3.Print Left Time.
+		//3.Change Password
 		if (input == "t") {
 
 			int number = 0;
-			//»ç¿ëÀÚ Á¤º¸¸¦ ÀÔ·Â¹Ş¾Æ ³²Àº ½Ã°£À» Ãâ·ÂÇÏµµ·Ï ÇÑ´Ù.
-			cout << "id ³ª ¹øÈ£¸¦ ÀÔ·ÂÇÏ¼¼¿ä." << endl;
-			cin >> number;
-			cout << "³²Àº »ç¿ë½Ã°£Àº :";
-			CafeConnectionManager::GetInstance()->Check_Time(number);
+			char id[15];
+			char psw[30];
+			char cp[30];
+			char ccp[30];
+
+			//ì‚¬ìš©ì ì •ë³´ë¥¼ ì…ë ¥ë°›ì•„ ë‚¨ì€ ì‹œê°„ì„ ì¶œë ¥í•˜ë„ë¡ í•œë‹¤.
+			cout << "ë¹„ë°€ë²ˆí˜¸ ë³€ê²½!!" << endl;
+			cout << "idë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš” : ";
+			scanf("%s", id);
+			cout << "ì›ë˜ ë¹„ë°€ë²ˆí˜¸ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”! : ";
+			scanf("%s", psw);
+			cout << "ë°”ê¿€ ë¹„ë°€ë²ˆí˜¸ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”! : ";
+			scanf("%s", cp);
+			cout << "ë°”ê¿€ ë¹„ë°€ë²ˆí˜¸ë¥¼ ë‹¤ì‹œí•œë²ˆ ì…ë ¥í•´ì£¼ì„¸ìš”! : ";
+			scanf("%s", ccp);
+
+			if (strcmp(cp, ccp) == 0)
+			{//ë¹„ë°€ë²ˆí˜¸í™•ì¸ ok
+				int tt;
+				CafeConnectionManager::GetInstance()->ChangePsw(id, psw, ccp, &tt);
+				if (tt == 0)
+				{
+					cout << "idë‚˜ passwordê°€ í‹€ë ¸ìŠµë‹ˆë‹¤!" << endl;
+				}
+				else
+					cout << "ë³€ê²½ì™„ë£Œ!" << endl;
+			}
+
 			continue;
 		}
 
 		//4.Running program.
 		if (input == "p") {
-			string program;
+			std::string prog;
 			info = 0;
 
-			// ÇÁ·Î±×·¥ ½ÇÇà.
-			// ´ë¾È 1. - Å°º¸µå ÈÄÅ·(Å°·Î±ë)
-			// ´ë¾È 2. - »ç¿ëÀÚ°¡ Á÷Á¢ ÀÔ·ÂÇÔ. / ÀÌ °æ¿ì ÇÁ·Î±×·¥¸í ÀÔ·ÂÀ» ¹Ş°í ½ÇÇàÁß ¹®±¸¸¦ ¶ç¿ò.
+			// í”„ë¡œê·¸ë¨ ì‹¤í–‰.
 
-			cout << "½ÇÇàÇÒ ÇÁ·Î±×·¥ ÀÌ¸§À» ÀÔ·ÂÇÏ¼¼¿ä :";
-			cin >> program;
-			cout << "id ³ª ¹øÈ£¸¦ ÀÔ·ÂÇÏ¼¼¿ä." << endl;
-			cin >> info;
-			// ÀúÀåÀº ½ºÅÃÀ» »ç¿ëÇÏ°Å³ª ¹øÈ£¸¦ °°ÀÌ ³Ñ°Ü¼­ Å« ¼öºÎÅÍ »èÁ¦.
-			if (CafeConnectionManager::GetInstance()->Send_program(Program_Num, info, program)) {
-				cout << program << " is running¡¦ " << endl;
-				Program_Num++;
-			}
+			cout << "ì‹¤í–‰í•  í”„ë¡œê·¸ë¨ ì´ë¦„ì„ ì…ë ¥í•˜ì„¸ìš” :";
+			getline(cin, prog);
+
+			// ì €ì¥ì€ ë²¡í„°ì‚¬ìš©
+
+			program.push_back(prog);
+
 			continue;
 		}
-		//5.Quitting program.
+		//5.Show Program
+		if (input == "h") {
+
+			cout << "í˜„ì¬ ì‹¤í–‰ì¤‘ì¸ í”„ë¡œê·¸ë¨ : ";
+
+			for (int i = 0; i < program.size(); i++)
+				cout << "[" << program[i] << "]  ";
+			cout << endl;
+			continue;
+		}
+		//6.Quitting program.
 		if (input == "q") {
 			string dead_program;
-			//infoÀÇ Program_Num Â° ÇÁ·Î±×·¥ (°¡Àå ÃÖ±ÙÀÇ ÇÁ·Î±×·¥)À» Á¾·á
+			//ê°€ì¥ ìµœê·¼ì˜ í”„ë¡œê·¸ë¨ì„ ì¢…ë£Œ
 
-			if (CafeConnectionManager::GetInstance()->Quit_program(Program_Num, info) && Program_Num > 0) {
-				string dead_program = CafeConnectionManager::GetInstance()->get_program(Program_Num, info);
-				cout << dead_program << "is closed" << endl;
-				Program_Num--;
-			} // ÀßµÇ¸é ÇÁ·Î±×·¥ÀÌ ´İÇû´Ù°í Ãâ·ÂÇÏ°í ³Ñ¹ö¸¦ ÇÏ³ª ÁÙÀÓ.
-			else
-				cout << "Error!" << endl;
-			return true;
-		}
-		//6.Random chatting.
-		if (input == "r") {
-			// ·£´ı Ã¤ÆÃÀÔ´Ï´Ù. Å¬¶óÀÌ¾ğÆ®¸¶´Ù Á¢¼Ó Æ÷Æ®°¡ ´Ù¸¥µ¥, µÎ Æ÷Æ®(or id?)¸¦ ·£´ıÀ¸·Î ¸ÅÄª½ÃÅµ´Ï´Ù.
-			// ¸ÕÀú »ç¿ëÇÒ ´Ğ³×ÀÓÀ» ¹Ş¾Æ¾ß ÇÏ´Âµ¥¿ä, ÀÌ°Ç ÀÚ±â ¾ÆÀÌµğ¸¦ ¹Ş¾Æ¿Í¼­ ÇÏ¸é µÇ°ÚÁÒ. ¾Æ´Ô ÀÔ·ÂÇÏ°Å³ª.
-			
-			char nick[20];
-			printf("´Ğ³×ÀÓ >> "); // ´Ğ³×ÀÓ -> ¾ÆÀÌµğ·Î
-			gets_s(nick); // ´Ğ³×ÀÓÀ» ¹ŞÀ½
-			
-			CafeConnectionManager::GetInstance()->Send_chat(nick); 
-			// Å¬¶ó-Å¬¶ó°£ ·£´ı Ã¤ÆÃÀ» ±¸ÇöÇÏ·Á¸é, ¼­¹ö´Â ´ç¿¬È÷ °ÅÃÄ¾ß ÇÕ´Ï´Ù!
-			// µû¶ó¼­ Á¢¼Ó ÈÄ - ·£Ãª ¸Ş´º ¼±ÅÃ - ¸Å´ÏÀú¿¡ ¸Ş½ÃÁö¸¦ º¸³»¸é ¸Å´ÏÀú°¡ ±×°É ´Ù¸¥ °÷¿¡ º¸³» ÁÖ¸é µË´Ï´Ù.
-			// ¿©±â¼­ µÑ ´Ù ·£Ãª ¸ğµå »óÅÂ¿©¾ß ÇÏ°ÚÁÒ. ¸¸¾à ·£Ãª¿¡ µé¾î¿Í ÀÖ´Â°Ô ÀÚ±â È¥ÀÚ¶ó¸é, ÀÚ±â ÀÚ½Å°ú ¿¬°áµÇ´Â °ÍÀ» ¹æÁöÇÏ±â À§ÇÑ °Íµµ ÀÖ¾î¾ßÁÒ.
-			// µÑ Áß ÇÏ³ª¶óµµ ³ª°£´Ù¸é, "´ëÈ­°¡ ²÷°å½À´Ï´Ù." or xx´ÔÀÌ ³ª°¡¼Ì½À´Ï´Ù. ¸¦ Ãâ·Â.
-			// ¿©±â¼­ Á¢¼Ó Á¾·á¸¦ ½ÇÇàÇÏ¸é, ¼­¹ö¿¡ ¾Ë·Á¾ß°ÚÁÒ.
-			// "»õ·Î¿î »ó´ë¸¦ Ã£À¸½Ã°Ú½À´Ï±î?" ¸¦ Ãâ·ÂÇÕ´Ï´Ù.
-			// ¾Æ´Ï¶ó¸é ·£Ãª ¸ğµå¸¦ ³ª°¡°í, ¸Ş´º°¡ ´Ù½Ã Ãâ·ÂµÇµµ·Ï ÇÕ´Ï´Ù.
-	
-			return true;
+			cout << program.back() << "ì„ ì¢…ë£Œí•˜ì˜€ìŠµë‹ˆë‹¤." << endl;
+			program.pop_back();
 		}
 	}
-	return false;
+	return true;
 }
 void StatusUpdater::AbortUsing()
 {
@@ -273,8 +327,11 @@ bool StatusUpdater::validate_ID()
 {
 	std::string input_id;
 	std::string input_password;
+
 	while (true)
 	{
+		char ps[50];
+		char psw;
 		std::cout << "ID please. Enter Q to quit\n";
 		std::getline(std::cin, input_id);
 		std::cin.clear();
@@ -282,50 +339,48 @@ bool StatusUpdater::validate_ID()
 			return false;
 		}
 		std::cout << "and password\n";
-		std::getline(std::cin, input_password);
+
+		for (int i = 0;;)
+		{//passwordë¥¼ *ë¡œ í‘œì‹œ
+			psw = getch();
+			if ((psw >= 'a'&&psw <= 'z') || (psw >= 'A'&&psw <= 'Z') || (psw >= '0'&&psw <= '9'))
+			{
+				ps[i] = psw;
+				++i;
+				cout << "*";
+			}
+			if (psw == '\b'&&i >= 1)//backspaceëˆŒë €ì„ë•Œ
+			{
+				cout << "\b \b";
+				--i;
+			}
+			if (psw == '\r')//enterëˆŒë €ì„ë•Œ(ì…ë ¥ì¢…ë£Œ)
+			{
+				ps[i] = '\0';
+				break;
+			}
+
+		}
+
+		input_password = ps;
+
 		std::string temp;
-		temp = sha256(std::string(input_password));
+		temp = sha256(std::string(input_password));//ë¹„ë°€ë²ˆí˜¸ê°€ ì•”í˜¸í™”ë¨
 		input_password = temp;
 		// function called in if parameter returns true when login function succeeds.
-		if (CafeConnectionManager::GetInstance()->Login(input_id, input_password))
+		int l = CafeConnectionManager::GetInstance()->Login(input_id, input_password);
+		if (l == 1)//ì •ìƒë¡œê·¸ì¸
 			break;
-		else
-			cout << "Wrong ID or password. try again\n\n";
-	}
-	return true;
-}
-bool StatusUpdater::validate_card()
-{
-	while (true)
-	{
-		int input_number;
-		std::string input;
-		std::cout << "enter cardnumber please. Enter Q to quit\n";
-		std::getline(cin, input);
-		std::cin.clear();
-		if (input == "Q" || input == "q")
-			return false;
-		input_number = atoi(input.c_str());
-		if (input_number == 0)
-		{
-			cout << "Invalid input\n";
-			continue;
-		}
-
-		// function called in if parameter returns true when login function succeeds.
-		if (CafeConnectionManager::GetInstance()->RequestCardUsage(input_number))
-		{
-			break;
-		}
-		else
-		{
-			cout << "Unavailable card number. try again\n\n";
-		}
+		else if (l == 2)//ì‹œê°„ì´ ì—†ì„ë•Œ(ë§¤ë‹ˆì €í´ë¼ì—ì„œ ì¶©ì „í•˜ê³ ì™€ì•¼ë¨)
+			cout << "\nNO TIME!!!! PLEASE RECHARGE TIME!\n\n";
+		else//ì•„ì´ë””ë‚˜ ë¹„ë²ˆí‹€ë¦¼
+			cout << "\nWrong ID or password . try again\n\n";
 	}
 	return true;
 }
 
-bool StatusUpdater::printOptions() {
+bool StatusUpdater::printOptions()
+{//ì‚¬ìš©ì ë©”ë‰´ì¶œë ¥
 	cout << \
 		"\n-------------------\n\
 Welcome to Tokki Pc cafe! I hope you enjoy your best time!\n\
@@ -334,10 +389,10 @@ if you have anything required using our service, please type one of the commands
 0.Check Status. (C)\n\
 1.StopUsing. (S) \n\
 2.Orderingfood. (F)\n\
-3.Print Left Time. (T) \n\
+3.Change Password. (T) \n\
 4.Running program. (P)\n\
-5.Quitting program. (Q)\n\
-6.Random chatting. (R)\n\
+5.Show program. (H)\n\
+6.Quitting program. (Q)\n\
 --------------------- \n\n";
 	return true;
 }
