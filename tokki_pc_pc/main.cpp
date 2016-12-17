@@ -5,11 +5,16 @@ We all know what main is. the very first start point of this whole program.
 Yunu Lee
 2016.11.07
 */
-int main() 
+int main()
 {
-	CafeConnectionManager::GetInstance()->Report(true,1);
-	if (StatusUpdater::GetInstance()->QueryValidation())
-		// ¿©±â¼­ È®ÀÎÇÑ °ÍÀ» ÀúÀåÇØ¾ß ÇÕ´Ï´Ù. - PC¿Í ¸â¹ö/Ä«µå¸¦ È®ÀÎÇÏ°í Ã¼Å©¾Æ¿ô/·Î±×¾Æ¿ô Àü±îÁö ¿¬°áÀ» À¯ÁöÇÕ´Ï´Ù.
-		StatusUpdater::GetInstance()->StartUsing();
+	while (1)
+	{
+		CafeConnectionManager::GetInstance()->Report(true, 1);
+		if (StatusUpdater::GetInstance()->QueryValidation())
+			// ì—¬ê¸°ì„œ í™•ì¸í•œ ê²ƒì„ ì €ìž¥í•´ì•¼ í•©ë‹ˆë‹¤. - PCì™€ ë©¤ë²„/ì¹´ë“œë¥¼ í™•ì¸í•˜ê³  ì²´í¬ì•„ì›ƒ/ë¡œê·¸ì•„ì›ƒ ì „ê¹Œì§€ ì—°ê²°ì„ ìœ ì§€í•©ë‹ˆë‹¤.
+			StatusUpdater::GetInstance()->StartUsing();
+		CafeConnectionManager::GetInstance()->Report(false, 1);
+		CafeConnectionManager::GetInstance()->StopUsing(1);
+	}
 	return 0;
 }
